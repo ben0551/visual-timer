@@ -165,8 +165,7 @@ private fun QuickCard(
     initialFocus: Boolean = false,
     onClick: () -> Unit,
 ) {
-    // The navigation rail grabs focus during its own initialisation, so keep trying:
-    // on a TV the first thing the user must see is where the remote is.
+    // Requesting focus from inside the item means the requester is already attached.
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(initialFocus) {
         if (!initialFocus) return@LaunchedEffect
@@ -176,14 +175,16 @@ private fun QuickCard(
             kotlinx.coroutines.delay(50)
         }
     }
+    val interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     Card(
         onClick = onClick,
+        interactionSource = interactionSource,
         modifier = modifier
             .fillMaxWidth()
             .height(112.dp)
             .focusRequester(focusRequester)
             .focusGroup()
-            .tvFocusScale(),
+            .tvFocusScale(interactionSource = interactionSource),
     ) {
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -203,9 +204,11 @@ private fun QuickCard(
 
 @Composable
 private fun PresetCard(preset: Preset, onClick: () -> Unit) {
+    val interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     Card(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth().tvFocusScale(),
+        interactionSource = interactionSource,
+        modifier = Modifier.fillMaxWidth().tvFocusScale(interactionSource = interactionSource),
     ) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {

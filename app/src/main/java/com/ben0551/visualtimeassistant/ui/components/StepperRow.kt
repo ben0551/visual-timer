@@ -15,7 +15,9 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -32,6 +34,8 @@ fun StepperRow(
     modifier: Modifier = Modifier,
     buttonSize: Dp = 64.dp,
 ) {
+    val minusInteraction = remember { MutableInteractionSource() }
+    val plusInteraction = remember { MutableInteractionSource() }
     Column(modifier = modifier) {
         Text(
             label,
@@ -43,7 +47,8 @@ fun StepperRow(
         Row(verticalAlignment = Alignment.CenterVertically) {
             FilledTonalButton(
                 onClick = onMinus,
-                modifier = Modifier.size(buttonSize).tvFocusScale(cornerRadius = 16.dp),
+                interactionSource = minusInteraction,
+                modifier = Modifier.size(buttonSize).tvFocusScale(cornerRadius = 16.dp, interactionSource = minusInteraction),
                 contentPadding = PaddingValues(0.dp),
             ) {
                 Icon(Icons.Rounded.Remove, contentDescription = "Decrease $label")
@@ -53,7 +58,8 @@ fun StepperRow(
             Spacer(Modifier.width(16.dp))
             FilledTonalButton(
                 onClick = onPlus,
-                modifier = Modifier.size(buttonSize).tvFocusScale(cornerRadius = 16.dp),
+                interactionSource = plusInteraction,
+                modifier = Modifier.size(buttonSize).tvFocusScale(cornerRadius = 16.dp, interactionSource = plusInteraction),
                 contentPadding = PaddingValues(0.dp),
             ) {
                 Icon(Icons.Rounded.Add, contentDescription = "Increase $label")

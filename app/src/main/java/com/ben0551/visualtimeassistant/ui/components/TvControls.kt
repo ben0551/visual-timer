@@ -1,6 +1,7 @@
 package com.ben0551.visualtimeassistant.ui.components
 
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -11,6 +12,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -29,10 +31,12 @@ fun TvFilterChip(
     label: String,
     modifier: Modifier = Modifier,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
     FilterChip(
         selected = selected,
         onClick = onClick,
         label = { Text(label) },
+        interactionSource = interactionSource,
         leadingIcon = if (selected) {
             { Icon(Icons.Rounded.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
         } else {
@@ -46,7 +50,7 @@ fun TvFilterChip(
             borderWidth = 0.dp,
             selectedBorderWidth = 2.dp,
         ),
-        modifier = modifier.tvFocusScale(scale = 1.06f, cornerRadius = 12.dp),
+        modifier = modifier.tvFocusScale(scale = 1.06f, cornerRadius = 12.dp, interactionSource = interactionSource),
     )
 }
 
@@ -61,10 +65,12 @@ fun TvSecondaryButton(
     enabled: Boolean = true,
     content: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
     FilledTonalButton(
         onClick = onClick,
-        modifier = modifier.tvFocusScale(cornerRadius = 16.dp),
+        modifier = modifier.tvFocusScale(cornerRadius = 16.dp, interactionSource = interactionSource),
         enabled = enabled,
+        interactionSource = interactionSource,
         content = content,
     )
 }

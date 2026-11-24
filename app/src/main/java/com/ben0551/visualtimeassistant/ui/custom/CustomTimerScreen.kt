@@ -1,5 +1,6 @@
 package com.ben0551.visualtimeassistant.ui.custom
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,8 +30,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -151,10 +154,13 @@ fun CustomTimerScreen(
                     color = if (error != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary,
                 )
                 Spacer(Modifier.height(16.dp))
-                Button(
+                val startInteraction = remember { MutableInteractionSource() }
+    Button(
                     onClick = { onStart(state.totalSeconds, state.theme) },
                     enabled = state.isValid,
-                    modifier = Modifier.fillMaxWidth().height(64.dp).tvFocusScale(cornerRadius = 20.dp),
+                    interactionSource = startInteraction,
+                    modifier = Modifier.fillMaxWidth().height(64.dp)
+                        .tvFocusScale(cornerRadius = 20.dp, borderColor = Color.White, interactionSource = startInteraction),
                 ) {
                     Text("START TIMER", style = MaterialTheme.typography.titleLarge)
                 }

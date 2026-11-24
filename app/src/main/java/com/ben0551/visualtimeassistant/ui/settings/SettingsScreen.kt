@@ -1,8 +1,11 @@
 package com.ben0551.visualtimeassistant.ui.settings
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -19,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
@@ -33,13 +37,18 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -63,6 +72,20 @@ fun SettingsScreen() {
     val viewModel: SettingsViewModel = hiltViewModel()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
 
+    // Land on the first control, not the navigation rail: DPAD up/down then walks the
+    // options themselves so the focused row always shows the amber highlight.
+    val firstControlFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        repeat(30) {
+            try {
+                firstControlFocus.requestFocus()
+                return@LaunchedEffect
+            } catch (_: Exception) {
+                kotlinx.coroutines.delay(50)
+            }
+        }
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(24.dp),
@@ -82,6 +105,7 @@ fun SettingsScreen() {
                 title = "Show countdown",
                 subtitle = "Large remaining-time number",
                 checked = settings.showCountdown,
+                focusRequester = firstControlFocus,
                 onChange = { value -> viewModel.update { it.copy(showCountdown = value) } },
             )
         }
@@ -214,25 +238,39 @@ private fun SectionTitle(text: String) {
 }
 
 /** Whole row toggles on OK - the switch itself is just the visual state. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ToggleRow(
     title: String,
     subtitle: String?,
     checked: Boolean,
+    focusRequester: FocusRequester? = null,
     onChange: (Boolean) -> Unit,
 ) {
+    // Focus state comes from the same InteractionSource the row hands to toggleable;
+    // ancestor focus-event observation proved unreliable inside lazy lists.
+    val interactionSource = remember { MutableInteractionSource() }
+    val focused by interactionSource.collectIsFocusedAsState()
+    val shape = RoundedCornerShape(16.dp)
+    val highlight = MaterialTheme.colorScheme.primary
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 64.dp)
+            .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
             .toggleable(
                 value = checked,
-                interactionSource = remember { MutableInteractionSource() },
+                interactionSource = interactionSource,
                 indication = null,
                 role = Role.Switch,
                 onValueChange = onChange,
             )
-            .tvFocusScale(cornerRadius = 16.dp)
+            .clip(shape)
+            .background(if (focused) highlight.copy(alpha = 0.30f) else Color.Transparent, shape)
+            .border(
+                BorderStroke(if (focused) 5.dp else 0.dp, if (focused) highlight else Color.Transparent),
+                shape,
+            )
             .padding(horizontal = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,

@@ -1,12 +1,20 @@
 package com.ben0551.visualtimeassistant.ui.navigation
 
 import android.net.Uri
+import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.FormatListBulleted
@@ -19,11 +27,15 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -38,6 +50,7 @@ import com.ben0551.visualtimeassistant.domain.model.Preset
 import com.ben0551.visualtimeassistant.domain.model.ThemeId
 import com.ben0551.visualtimeassistant.domain.model.TimerRequest
 import com.ben0551.visualtimeassistant.domain.model.WarningProfileId
+import com.ben0551.visualtimeassistant.ui.components.tvFocusScale
 import com.ben0551.visualtimeassistant.ui.custom.CustomTimerScreen
 import com.ben0551.visualtimeassistant.ui.home.HomeScreen
 import com.ben0551.visualtimeassistant.ui.presets.PresetsScreen
@@ -204,8 +217,11 @@ private fun AdaptiveShell(
                 bottomBar = { BottomBar(currentRoute, onNavigate) },
             ) { padding -> content(padding) }
         } else {
-            Row(Modifier.fillMaxSize()) {
-                NavigationRail { RailItems(currentRoute, onNavigate) }
+            // Wide layout (TV/tablet): tabs across the top so DPAD up/down moves between the
+            // tab row and the options themselves - with a side rail, DOWN dead-ended on the
+            // last tab and never reached the settings rows.
+            Column(Modifier.fillMaxSize()) {
+                TopTabs(currentRoute, onNavigate)
                 Box(Modifier.weight(1f)) { content(PaddingValues(0.dp)) }
             }
         }
@@ -224,6 +240,59 @@ private val destinations = listOf(
     NavDestinationItem(Routes.STATS, "Statistics", Icons.Rounded.BarChart),
     NavDestinationItem(Routes.SETTINGS, "Settings", Icons.Rounded.Settings),
 )
+
+@Composable
+private fun TopTabs(currentRoute: String?, onNavigate: (String) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        destinations.forEach { item ->
+            val selected = currentRoute == item.route
+            val tabInteraction = remember { MutableInteractionSource() }
+            Surface(
+                selected = selected,
+                onClick = { onNavigate(item.route) },
+                interactionSource = tabInteraction,
+                modifier = Modifier.weight(1f).height(72.dp).tvFocusScale(cornerRadius = 14.dp, interactionSource = tabInteraction),
+                color = if (selected) {
+                    MaterialTheme.colorScheme.secondaryContainer
+                } else {
+                    Color.Transparent
+                },
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Icon(
+                        item.icon,
+                        contentDescription = null,
+                        tint = if (selected) {
+                            MaterialTheme.colorScheme.onSecondaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        modifier = Modifier.size(26.dp),
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        item.label,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = if (selected) {
+                            MaterialTheme.colorScheme.onSecondaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
 
 @Composable
 private fun BottomBar(currentRoute: String?, onNavigate: (String) -> Unit) {

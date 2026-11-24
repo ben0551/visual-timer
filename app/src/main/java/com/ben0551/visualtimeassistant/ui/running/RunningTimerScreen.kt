@@ -10,6 +10,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -36,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -279,13 +281,16 @@ fun RunningTimerScreen(
             Spacer(Modifier.height(24.dp))
 
             // Wraps onto a second line on narrow phones so every control stays reachable.
+            val doneInteraction = remember { MutableInteractionSource() }
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Button(
                     onClick = { viewModel.done() },
-                    modifier = Modifier.height(72.dp).width(180.dp).tvFocusScale(cornerRadius = 20.dp),
+                    interactionSource = doneInteraction,
+                    modifier = Modifier.height(72.dp).width(180.dp)
+                        .tvFocusScale(cornerRadius = 20.dp, borderColor = Color.White, interactionSource = doneInteraction),
                 ) {
                     Text(
                         "DONE",
