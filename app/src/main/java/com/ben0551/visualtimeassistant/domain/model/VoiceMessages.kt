@@ -14,18 +14,29 @@ object VoiceMessages {
         else -> "Only $percent percent remaining."
     }
 
-    /** Dad Mode line. [thresholdPercent] of [totalSeconds] translates to whole minutes. */
+    /** Dad Mode line: says how much time is actually left at the threshold. */
     fun dadMode(thresholdPercent: Int, totalSeconds: Int): String {
-        val minutes = ceil((totalSeconds * thresholdPercent / 100.0) / 60.0).toInt().coerceAtLeast(1)
-        val label = if (minutes == 1) "One minute" else "$minutes minutes"
-        return "$label remaining. Finish what you're doing."
+        val remainingSec = remainingSeconds(thresholdPercent, totalSeconds)
+        return "${humanDuration(remainingSec)} remaining. Finish what you're doing."
     }
 
-    /** Dad Mode banner text, e.g. "ONE MINUTE LEFT". */
+    /** Dad Mode banner text, e.g. "ONE MINUTE LEFT" / "45 SECONDS LEFT". */
     fun dadModeBanner(thresholdPercent: Int, totalSeconds: Int): String {
-        val minutes = ceil((totalSeconds * thresholdPercent / 100.0) / 60.0).toInt().coerceAtLeast(1)
-        val label = if (minutes == 1) "ONE MINUTE" else "$minutes MINUTES"
-        return "⚠ $label LEFT ⚠"
+        val remainingSec = remainingSeconds(thresholdPercent, totalSeconds)
+        return "⚠ ${humanDuration(remainingSec).uppercase()} LEFT ⚠"
+    }
+
+    private fun remainingSeconds(thresholdPercent: Int, totalSeconds: Int): Int =
+        Math.round(totalSeconds * thresholdPercent / 100.0f).toInt().coerceAtLeast(1)
+
+    /** "45 seconds", "1 minute", "2 minutes". */
+    private fun humanDuration(totalSeconds: Int): String {
+        val minutes = totalSeconds / 60
+        return if (minutes >= 1) {
+            if (minutes == 1) "1 minute" else "$minutes minutes"
+        } else {
+            "$totalSeconds seconds"
+        }
     }
 
     const val TIME_IS_UP = "Time is up."

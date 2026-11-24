@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -24,7 +25,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -53,6 +58,7 @@ fun HomeScreen(
     val presets by viewModel.presets.collectAsStateWithLifecycle()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
 
+    // Start with the first quick-start card focused so the remote user can see where they are.
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 170.dp),
         modifier = Modifier.fillMaxSize(),
@@ -93,6 +99,7 @@ fun HomeScreen(
             QuickCard(
                 title = "${seconds / 60} MINUTES",
                 subtitle = DurationFormatter.clock(seconds),
+                initialFocus = seconds == QUICK_DURATIONS.first(),
                 onClick = { onStartDuration(seconds, settings.theme) },
             )
         }
@@ -151,10 +158,33 @@ private fun SectionLabel(text: String) {
 }
 
 @Composable
-private fun QuickCard(title: String, subtitle: String, onClick: () -> Unit) {
+private fun QuickCard(
+    title: String,
+    subtitle: String,
+    modifier: Modifier = Modifier,
+    initialFocus: Boolean = false,
+    onClick: () -> Unit,
+) {
+    // Requesting focus from inside the item means the requester is already attached.
+    // The navigation rail grabs focus during its own initialisation, so keep trying:
+    // on a TV the first thing the user must see is where the remote is.
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(initialFocus) {
+        if (!initialFocus) return@LaunchedEffect
+        repeat(30) {
+            val requested = runCatching { focusRequester.requestFocus() }.isSuccess
+            if (requested) return@LaunchedEffect
+            kotlinx.coroutines.delay(50)
+        }
+    }
     Card(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth().height(112.dp).tvFocusScale(),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(112.dp)
+            .focusRequester(focusRequester)
+            .focusGroup()
+            .tvFocusScale(),
     ) {
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),

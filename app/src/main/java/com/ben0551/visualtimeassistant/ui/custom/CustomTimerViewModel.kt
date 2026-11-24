@@ -60,6 +60,11 @@ class CustomTimerViewModel @Inject constructor(
 
     fun setTheme(theme: ThemeId) = update { it.copy(theme = theme) }
 
+    /** One-tap duration shortcuts for the remote control. */
+    fun applyQuickMinutes(minutes: Int) = update {
+        it.copy(hours = 0, minutes = minutes.coerceIn(0, 59), seconds = 0)
+    }
+
     private fun update(transform: (CustomTimerUiState) -> CustomTimerUiState) {
         _state.value = transform(_state.value)
     }

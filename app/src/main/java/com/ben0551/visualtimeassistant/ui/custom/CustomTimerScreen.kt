@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,6 +40,7 @@ import com.ben0551.visualtimeassistant.ui.components.tvFocusScale
 import com.ben0551.visualtimeassistant.util.DurationFormatter
 
 /** Screen 2 - build a custom timer (10 seconds to 24 hours). */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CustomTimerScreen(
     onBack: () -> Unit,
@@ -90,15 +93,41 @@ fun CustomTimerScreen(
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(Modifier.height(8.dp))
-                Row(
-                    Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                FlowRow(
+                    Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     ThemeId.selectable().forEach { theme ->
                         FilterChip(
                             selected = state.theme == theme,
                             onClick = { viewModel.setTheme(theme) },
                             label = { Text(theme.displayName) },
+                        )
+                    }
+                }
+            }
+        }
+
+        item {
+            Column {
+                Text(
+                    "QUICK SET",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                )
+                Spacer(Modifier.height(8.dp))
+                FlowRow(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    listOf(1, 2, 5, 10, 15, 30).forEach { minutes ->
+                        FilterChip(
+                            selected = state.minutes == minutes && state.hours == 0 && state.seconds == 0,
+                            onClick = { viewModel.applyQuickMinutes(minutes) },
+                            label = { Text("$minutes MIN") },
                         )
                     }
                 }

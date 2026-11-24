@@ -2,6 +2,7 @@ package com.ben0551.visualtimeassistant.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -21,13 +22,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * D-Pad affordance: scales the element and draws an amber outline while focused.
- * Apply to any clickable card/button so TV users always see where they are.
+ * D-Pad affordance: scales the element and draws a bright amber outline plus a soft tint
+ * while focused. Apply to any clickable card/button so TV users always see where they are.
  */
 @Composable
 fun Modifier.tvFocusScale(
-    scale: Float = 1.05f,
-    borderWidth: Dp = 3.dp,
+    scale: Float = 1.07f,
+    borderWidth: Dp = 4.dp,
     borderColor: Color = MaterialTheme.colorScheme.primary,
     cornerRadius: Dp = 16.dp,
 ): Modifier {
@@ -41,14 +42,18 @@ fun Modifier.tvFocusScale(
     return this
         .onFocusChanged { state -> focused = state.isFocused }
         .clip(shape)
-        .then(if (focused) Modifier.border(BorderStroke(borderWidth, borderColor), shape) else Modifier)
+        .background(if (focused) borderColor.copy(alpha = 0.18f) else Color.Transparent, shape)
+        .border(
+            BorderStroke(borderWidth, if (focused) borderColor else Color.Transparent),
+            shape,
+        )
         .scale(animatedScale)
 }
 
 /** Small helper for stacking a focused border without scaling. */
 @Composable
 fun Modifier.tvFocusBorder(
-    borderWidth: Dp = 3.dp,
+    borderWidth: Dp = 4.dp,
     borderColor: Color = MaterialTheme.colorScheme.primary,
     cornerRadius: Dp = 16.dp,
 ): Modifier {
@@ -57,7 +62,10 @@ fun Modifier.tvFocusBorder(
     return this
         .onFocusChanged { state -> focused = state.isFocused }
         .clip(shape)
-        .then(if (focused) Modifier.border(BorderStroke(borderWidth, borderColor), shape) else Modifier)
+        .border(
+            BorderStroke(borderWidth, if (focused) borderColor else Color.Transparent),
+            shape,
+        )
 }
 
 @Composable

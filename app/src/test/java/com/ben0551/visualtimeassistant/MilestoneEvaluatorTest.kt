@@ -70,11 +70,12 @@ class MilestoneEvaluatorTest {
     }
 
     @Test
-    fun `dad mode message scales with the threshold`() {
-        val message = VoiceMessages.dadMode(thresholdPercent = 5, totalSeconds = 900)
-        assertTrue(message.startsWith("One minute remaining."))
+    fun `dad mode message says how long is actually left`() {
+        val fortyFiveSeconds = VoiceMessages.dadMode(thresholdPercent = 5, totalSeconds = 900)
+        assertTrue(fortyFiveSeconds.startsWith("45 seconds remaining."))
         val fiveMinutes = VoiceMessages.dadMode(thresholdPercent = 25, totalSeconds = 1200)
         assertTrue(fiveMinutes.startsWith("5 minutes remaining."))
+        assertEquals("⚠ 45 SECONDS LEFT ⚠", VoiceMessages.dadModeBanner(5, 900))
     }
 
     @Test

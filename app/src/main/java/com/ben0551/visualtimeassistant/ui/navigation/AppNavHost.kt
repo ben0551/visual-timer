@@ -84,6 +84,10 @@ fun AppNavHost(
     LaunchedEffect(initialTimerRequest) {
         initialTimerRequest?.let { request ->
             runCatching {
+                // Replace an in-flight timer instead of stacking a second one.
+                if (navController.currentDestination?.route?.startsWith("running/") == true) {
+                    navController.popBackStack()
+                }
                 navController.navigate(
                     Routes.duration(
                         seconds = request.seconds,
