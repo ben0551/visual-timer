@@ -22,7 +22,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.VolumeOff
+import androidx.compose.material.icons.rounded.VolumeUp
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -292,7 +296,27 @@ fun RunningTimerScreen(
                 ) {
                     Text("STOP", fontSize = 18.sp)
                 }
+                OutlinedButton(
+                    onClick = { viewModel.toggleMute() },
+                    modifier = Modifier.height(72.dp).width(160.dp).tvFocusScale(cornerRadius = 20.dp),
+                ) {
+                    Icon(
+                        imageVector = if (state.muted) Icons.Rounded.VolumeOff else Icons.Rounded.VolumeUp,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.size(6.dp))
+                    Text(if (state.muted) "UNMUTE" else "MUTE", fontSize = 18.sp)
+                }
             }
+
+            Spacer(Modifier.height(10.dp))
+            Text(
+                text = "DONE = finished, time saved   ·   STOP = cancel the timer",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
 
             if (state.phase == TimerUiState.Phase.PAUSED) {
                 Spacer(Modifier.height(12.dp))

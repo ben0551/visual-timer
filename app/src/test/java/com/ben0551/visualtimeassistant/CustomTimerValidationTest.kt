@@ -43,7 +43,9 @@ class CustomTimerValidationTest {
     fun `status text reflects progress`() {
         assertEquals(StatusText.GETTING_STARTED, StatusText.of(0.1f, 900, 0))
         assertEquals(StatusText.HALF_WAY, StatusText.of(0.6f, 360, 0))
-        assertEquals("2 MINUTES LEFT", StatusText.of(0.9f, 120, 0))
+        assertEquals("2 MINUTES LEFT", StatusText.of(0.9f, 150, 0))
+        assertEquals("1 MINUTE LEFT", StatusText.of(0.95f, 60, 0))
+        assertEquals("3 SECONDS LEFT", StatusText.of(0.97f, 3, 0))
         assertEquals(StatusText.TIME_IS_UP, StatusText.of(1f, -34, 34))
     }
 }

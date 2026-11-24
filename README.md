@@ -1,4 +1,4 @@
-# Visual Time Assistant
+# Visual Timer
 
 An Android app that makes the passage of time **visual** for children aged 6–12, built for
 **Android TV** first, with tablet and phone support from the same codebase.

@@ -39,6 +39,7 @@ data class TimerUiState(
     val displayMode: DisplayMode = DisplayMode.BAR,
     val dadModeActive: Boolean = false,
     val dadModeThresholdPercent: Int = TimerLimits.DAD_MODE_DEFAULT_THRESHOLD_PERCENT,
+    val muted: Boolean = false,
     val statusText: String = StatusText.GETTING_STARTED,
     val showCountdown: Boolean = true,
     val showPercentage: Boolean = true,
@@ -84,6 +85,7 @@ class RunningTimerViewModel @Inject constructor(
     private var lastRemainingSec: Int = 0
     private var recorded = false
     private var started = false
+    private var mutedNow = false
 
     /** Called once per composition with the nav arguments; restarts if they change. */
     fun start(
@@ -112,6 +114,7 @@ class RunningTimerViewModel @Inject constructor(
 
         viewModelScope.launch {
             settings = runCatching { settingsRepository.current() }.getOrDefault(AppSettings())
+            mutedNow = settings.muteMode
             evaluator = MilestoneEvaluator(
                 totalSeconds = totalSec,
                 profile = warningProfile,
@@ -129,6 +132,7 @@ class RunningTimerViewModel @Inject constructor(
                 presetName = displayName,
                 displayTheme = theme,
                 dadModeThresholdPercent = settings.dadModeThresholdPercent,
+                muted = settings.muteMode,
                 displayMode = settings.displayMode,
                 showCountdown = settings.showCountdown,
                 showPercentage = settings.showPercentage,
@@ -155,6 +159,16 @@ class RunningTimerViewModel @Inject constructor(
                 tickJob?.cancel()
                 updatePhase(TimerUiState.Phase.PAUSED)
             }
+        }
+    }
+
+    /** Live mute from the timer screen; persists to settings so it survives restarts. */
+    fun toggleMute() {
+        val next = !mutedNow
+        mutedNow = next
+        _uiState.value = _uiState.value.copy(muted = next)
+        viewModelScope.launch {
+            runCatching { settingsRepository.update { it.copy(muteMode = next) } }
         }
     }
 
@@ -229,7 +243,7 @@ class RunningTimerViewModel @Inject constructor(
     }
 
     private fun handleAlert(alert: com.ben0551.visualtimeassistant.timer.TimerAlert) {
-        val muted = settings.muteMode
+        val muted = mutedNow
         val voiceOn = settings.voiceEnabled && !muted
         when (alert.kind) {
             AlertKind.CHIME -> if (!muted) chimePlayer.chime()

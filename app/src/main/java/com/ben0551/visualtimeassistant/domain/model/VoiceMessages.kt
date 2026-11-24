@@ -55,8 +55,9 @@ object StatusText {
             elapsedFraction < 0.25f -> GETTING_STARTED
             elapsedFraction < 0.55f -> KEEP_GOING
             elapsedFraction < 0.85f -> HALF_WAY
-            remainingSec > 60 -> "${remainingSec / 60} MINUTES LEFT"
-            else -> "LESS THAN A MINUTE"
+            remainingSec > 120 -> "${remainingSec / 60} MINUTES LEFT"
+            remainingSec >= 60 -> "1 MINUTE LEFT"
+            else -> "$remainingSec SECONDS LEFT"
         }
     }
 }

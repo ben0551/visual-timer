@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Visual Time Assistant</string>
-    <string name="tv_banner_desc">Visual Time Assistant</string>
+    <string name="app_name">Visual Timer</string>
+    <string name="tv_banner_desc">Visual Timer</string>
     <string name="leanback_desc">Visual timer for kids</string>
 </resources>

@@ -77,7 +77,7 @@ fun HomeScreen(
                     )
                     Spacer(Modifier.size(12.dp))
                     Text(
-                        "Visual Time Assistant",
+                        "Visual Timer",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                     )
