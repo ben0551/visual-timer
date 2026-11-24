@@ -6,6 +6,7 @@ import com.ben0551.visualtimeassistant.domain.model.TimerRequest
 import com.ben0551.visualtimeassistant.domain.model.WarningProfileId
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -40,6 +41,31 @@ class TimerRequestTest {
         assertEquals(ThemeId.FOREST, request.theme)
         assertEquals(WarningProfileId.DEFAULT, request.warningProfile)
         assertTrue(request.isValid)
+    }
+
+    @Test
+    fun `preset selectors are carried for the app to resolve`() {
+        val request = TimerRequest.fromQueryParameters(
+            seconds = null,
+            name = null,
+            theme = null,
+            profile = null,
+            presetId = 7L,
+            preset = "Morning Routine",
+        )
+        assertEquals(7L, request.presetId)
+        assertEquals("Morning Routine", request.presetSelector)
+        assertTrue(request.isValid)
+
+        val byNameOnly = TimerRequest.fromQueryParameters(null, null, null, null, preset = "Bed Time")
+        assertTrue(byNameOnly.isValid)
+        assertNull(byNameOnly.presetId)
+    }
+
+    @Test
+    fun `plain durations still require a valid range`() {
+        assertFalse(TimerRequest(seconds = 5).isValid)
+        assertFalse(TimerRequest(seconds = 999999, presetId = null).isValid)
     }
 
     @Test

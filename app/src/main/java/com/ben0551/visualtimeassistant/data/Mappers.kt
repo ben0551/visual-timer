@@ -75,6 +75,7 @@ fun AppSettingsEntity.toDomain(): AppSettings = AppSettings(
     reducedMotion = reducedMotion,
     colourBlindPalette = colourBlindPalette,
     muteMode = muteMode,
+    overtimeEnabled = overtimeEnabled,
 )
 
 fun AppSettings.toEntity(): AppSettingsEntity = AppSettingsEntity(
@@ -93,6 +94,7 @@ fun AppSettings.toEntity(): AppSettingsEntity = AppSettingsEntity(
     reducedMotion = reducedMotion,
     colourBlindPalette = colourBlindPalette,
     muteMode = muteMode,
+    overtimeEnabled = overtimeEnabled,
 )
 
 /** Parse "25,50,75" into [25, 50, 75]; drops junk and clamps to 1..100. */

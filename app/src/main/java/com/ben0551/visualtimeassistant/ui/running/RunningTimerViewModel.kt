@@ -226,16 +226,25 @@ class RunningTimerViewModel @Inject constructor(
 
     private fun publish(elapsedSec: Int, remainingSec: Int) {
         val state = _uiState.value
-        // Dad Mode stays lit through overtime until the parent presses DONE.
+        val expired = remainingSec <= 0
+        // Overtime kill-switch: stop exactly at zero instead of counting late time.
+        val shownRemaining = if (expired && !settings.overtimeEnabled) 0 else remainingSec
         val dadThresholdSec = state.totalSec * settings.dadModeThresholdPercent / 100.0
-        val dadModeActive = settings.dadModeEnabled && remainingSec <= dadThresholdSec
+        val dadModeActive = settings.dadModeEnabled && when {
+            remainingSec <= 0 -> settings.overtimeEnabled
+            else -> remainingSec <= dadThresholdSec
+        }
         _uiState.value = state.copy(
             elapsedSec = elapsedSec,
-            remainingSec = remainingSec,
-            phase = if (remainingSec <= 0) TimerUiState.Phase.EXPIRED else state.phase,
+            remainingSec = shownRemaining,
+            phase = if (expired) TimerUiState.Phase.EXPIRED else state.phase,
             dadModeActive = dadModeActive,
-            statusText = StatusText.of(state.elapsedFraction, remainingSec, state.overtimeSec),
+            statusText = if (expired) StatusText.TIME_IS_UP
+            else StatusText.of(state.elapsedFraction, remainingSec, state.overtimeSec),
         )
+        if (expired && !settings.overtimeEnabled) {
+            tickJob?.cancel()
+        }
     }
 
     private fun updatePhase(phase: TimerUiState.Phase) {

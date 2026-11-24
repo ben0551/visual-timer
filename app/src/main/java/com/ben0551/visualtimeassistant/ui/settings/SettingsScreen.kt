@@ -151,6 +151,14 @@ fun SettingsScreen() {
                 )
             }
         }
+        item {
+            ToggleRow(
+                title = "Count overtime",
+                subtitle = "Off: TIME IS UP ends the timer - no late tracking",
+                checked = settings.overtimeEnabled,
+                onChange = { value -> viewModel.update { it.copy(overtimeEnabled = value) } },
+            )
+        }
 
         item { SectionTitle("ACCESSIBILITY") }
         item {

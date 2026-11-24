@@ -133,8 +133,8 @@ fun RunningTimerScreen(
                     ),
             )
         }
-        // Expired: red tint over the whole screen.
-        if (state.isOvertime) {
+        // Timer finished: red tint over the whole screen.
+        if (state.phase == TimerUiState.Phase.EXPIRED) {
             Box(
                 Modifier
                     .matchParentSize()
@@ -172,6 +172,14 @@ fun RunningTimerScreen(
                     seconds = state.overtimeSec,
                     color = Color(0xFFFF5252),
                     largeText = state.largeText,
+                )
+            } else if (state.phase == TimerUiState.Phase.EXPIRED) {
+                // Overtime disabled: the timer simply ends at zero.
+                Text(
+                    text = VoiceMessages.TIME_IS_UP,
+                    fontSize = if (state.largeText) 96.sp else 72.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFFF5252),
                 )
             } else if (state.showCountdown) {
                 CountdownText(

@@ -30,6 +30,9 @@ interface PresetDao {
     @Query("SELECT COUNT(*) FROM presets")
     suspend fun count(): Int
 
+    @Query("SELECT * FROM presets WHERE name = :name COLLATE NOCASE LIMIT 1")
+    suspend fun byName(name: String): PresetEntity?
+
     @Query("UPDATE presets SET isFavourite = :favourite WHERE id = :id")
     suspend fun setFavourite(id: Long, favourite: Boolean)
 }

@@ -27,6 +27,12 @@ class PresetRepository @Inject constructor(
 
     suspend fun byId(id: Long): Preset? = presetDao.byId(id)?.toDomain()
 
+    /** Resolves an automation selector: a numeric preset id, or a case-insensitive name. */
+    suspend fun find(selector: String): Preset? {
+        selector.trim().toLongOrNull()?.let { id -> return byId(id) }
+        return presetDao.byName(selector.trim())?.toDomain()
+    }
+
     suspend fun save(preset: Preset) {
         if (preset.id == 0L) {
             presetDao.insert(preset.toEntity())

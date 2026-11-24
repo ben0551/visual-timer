@@ -8,13 +8,18 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.lifecycleScope
+import com.ben0551.visualtimeassistant.data.repo.PresetRepository
 import com.ben0551.visualtimeassistant.domain.model.TimerRequest
 import com.ben0551.visualtimeassistant.ui.navigation.AppNavHost
 import com.ben0551.visualtimeassistant.ui.theme.VisualTimeAssistantTheme
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject lateinit var presetRepository: PresetRepository
 
     /** Latest automation request (deep link or intent extras), cleared once the UI shows it. */
     private var timerRequest by mutableStateOf<TimerRequest?>(null)
@@ -42,7 +47,9 @@ class MainActivity : ComponentActivity() {
     /**
      * Accepts either the deep link
      * `visualtime://timer?seconds=900&name=Custom&theme=FOREST&profile=DEFAULT`
-     * or the raw extras `vta_seconds`, `vta_name`, `vta_theme`, `vta_profile`.
+     * (add `preset=Morning%20Routine` to launch a stored preset)
+     * or the raw extras `vta_seconds`, `vta_name`, `vta_theme`, `vta_profile`,
+     * `vta_preset_id` / `vta_preset`.
      */
     private fun handleIntent(intent: Intent?) {
         if (intent == null) return
@@ -54,18 +61,43 @@ class MainActivity : ComponentActivity() {
                     name = data.getQueryParameter("name"),
                     theme = data.getQueryParameter("theme"),
                     profile = data.getQueryParameter("profile"),
+                    presetId = data.getQueryParameter("presetId")?.toLongOrNull(),
+                    preset = data.getQueryParameter("preset"),
                 )
 
-            intent.hasExtra(TimerRequest.EXTRA_SECONDS) -> TimerRequest.fromIntentExtras(
+            intent.hasExtra(TimerRequest.EXTRA_SECONDS) ||
+                intent.hasExtra(TimerRequest.EXTRA_PRESET) ||
+                intent.hasExtra(TimerRequest.EXTRA_PRESET_ID) -> TimerRequest.fromIntentExtras(
                 seconds = intent.extras?.get(TimerRequest.EXTRA_SECONDS).toSecondsOrNull(),
                 name = intent.extras?.get(TimerRequest.EXTRA_NAME)?.toString(),
                 theme = intent.extras?.get(TimerRequest.EXTRA_THEME)?.toString(),
                 profile = intent.extras?.get(TimerRequest.EXTRA_PROFILE)?.toString(),
+                presetId = intent.extras?.get(TimerRequest.EXTRA_PRESET_ID).toPresetIdOrNull(),
+                preset = intent.extras?.get(TimerRequest.EXTRA_PRESET)?.toString(),
             )
 
             else -> null
         }
-        if (request != null && request.isValid) {
+        if (request == null || !request.isValid) return
+
+        val selector = request.presetSelector
+        if (selector != null) {
+            // Resolve "Morning Routine" (or an id) against stored presets before launching.
+            lifecycleScope.launchWhenStarted {
+                val preset = presetRepository.find(selector)
+                timerRequest = if (preset != null) {
+                    TimerRequest(
+                        seconds = preset.durationSec,
+                        presetName = preset.name,
+                        theme = preset.theme,
+                        warningProfile = preset.warningProfile,
+                        presetId = preset.id,
+                    )
+                } else {
+                    null
+                }
+            }
+        } else {
             timerRequest = request
         }
     }
@@ -74,6 +106,13 @@ class MainActivity : ComponentActivity() {
         is Int -> takeIf { it > 0 }
         is Long -> takeIf { it > 0 }?.toInt()
         is String -> toIntOrNull()?.takeIf { it > 0 }
+        else -> null
+    }
+
+    private fun Any?.toPresetIdOrNull(): Long? = when (this) {
+        is Int -> takeIf { it > 0 }?.toLong()
+        is Long -> takeIf { it > 0 }
+        is String -> toLongOrNull()?.takeIf { it > 0 }
         else -> null
     }
 }

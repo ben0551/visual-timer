@@ -5,34 +5,92 @@ An Android app that makes the passage of time **visual** for children aged 6–1
 
 Instead of an abstract countdown, remaining time is shown as a growing bar, filling pie,
 block countdown and an animated environment (a plant growing, a rocket climbing, fish
-appearing in an aquarium...). When the timer expires, overtime keeps counting so parents get
-real data about how long tasks actually take.
+appearing in an aquarium...). When the timer expires, overtime can keep counting so parents
+get real data about how long tasks actually take — or it can stop dead at zero if you prefer.
 
 ## Screenshots
 
-| Android tablet (portrait-class layout) | Android TV |
+| Android tablet | Android TV |
 | --- | --- |
 | ![Home - quick start cards](docs/screenshots/home-tablet.png) | ![Settings - remote-first controls](docs/screenshots/settings-tv.png) |
 | ![Running timer with wrapped controls](docs/screenshots/timer-tablet.png) | ![Statistics dashboard](docs/screenshots/statistics-tv.png) |
 
-## Features (v1.0)
+## Features
 
 | Area | What's implemented |
 | --- | --- |
 | Home | Large quick-start cards (5/10/15/30 min, custom) plus the family's presets |
-| Custom timer | Hours/minutes/seconds steppers, 10 s – 24 h validation |
+| Custom timer | Hours/minutes/seconds steppers + one-press quick-set chips, 10 s – 24 h validation |
 | Running timer | Countdown sized for 5–10 m legibility, elapsed-growth progress, pause/resume |
 | Progress modes | Bar, circular, blocks, combined (bar + percentage) |
 | Themes | Forest Growth, Rocket Launch, Aquarium, Space Journey, Potato Empire™, Random |
 | Warning system | 50 % chime → 25 % voice → 10 % voice + highlight → 5 % Dad Mode → expiry |
 | Dad Mode | Adjustable 1–50 % threshold: dim, pulsing bar, flashing amber frame, spoken prompt |
-| Overtime | Timer keeps running past zero ("TIME IS UP · LATE BY 00:34") until DONE |
+| Overtime | Optional. On: keeps counting past zero ("TIME IS UP · LATE BY 00:34"). Off: zero ends it |
 | Analytics | Today's runs/on-time/late, 7 & 30 day average overtime, most difficult / easiest tasks |
 | Presets | Parent-editable name, duration, theme, warning profile, favourite |
-| Settings | Display toggles, progress style, theme, voice prompts, custom milestones, accessibility |
+| Settings | Remote-first: whole-row toggles, wrapping chips, ON/OFF labels, mute button on the timer |
 | Accessibility | High contrast, large text, reduced motion, colour-blind palette, mute mode |
 | Platforms | D-Pad/OK/Back only operation on TV; touch-friendly layouts on tablet/phone |
 | Offline | 100 % offline, no accounts, no ads, no telemetry |
+
+## Install on your TV, tablet or phone
+
+1. Get the APK from the latest [release](https://github.com/ben0551/visual-timer/releases)
+   (`visual-timer-*-debug.apk`) — debug-signed, so it installs anywhere.
+2. Connect a machine with `adb` to the device:
+
+   - **Android TV**: Settings → System → About → tap *Build* 7× → back to System →
+     *Developer options* → enable **Wireless debugging**. The port is random and changes
+     when the TV restarts; discover it with the helper
+     [`gtv.py find-port`](https://github.com/ben0551/visual-timer/blob/main/scripts/)
+     or read it under "Wireless debugging" on screen.
+   - **Phone/tablet**: Settings → Developer options → **Wireless debugging** (USB works too).
+3. Pair/connect once, then install:
+
+```bash
+adb pair <ip>:<port>          # only if asked for the pairing code
+adb connect <ip>:<port>
+adb install -r visual-timer-vX.Y-debug.apk
+```
+
+4. Open **Visual Timer** from the launcher (it also appears in the TV home-screen row).
+   First launch seeds starter presets (Morning Routine, Shoes On, Brush Teeth, ...).
+
+The app needs **no permissions**, no account and no network access.
+
+## Use with an AI agent (Hermes / OpenClaw / Claude Code / Codex…)
+
+Any agent that can run a shell command can drive the app over adb — the same
+call-with-parameters pattern as an MCP tool, but no MCP server to host. Hermes ships a
+skill for it; other harnesses just run the repo scripts.
+
+```bash
+./scripts/tv_timer.sh 15 POTATO "Morning Routine"   # 15 minutes, potato theme
+./scripts/tv_preset.sh "Morning Routine"            # launch the stored preset
+```
+
+Deep link / intent contract:
+
+```
+visualtime://timer?seconds=900&name=Morning%20Routine&theme=POTATO&profile=DEFAULT
+visualtime://timer?preset=Morning%20Routine          # resolve a stored preset by name/id
+```
+
+Extras equivalent: `--ei vta_seconds 900 --es vta_name "Morning Routine"
+--es vta_theme POTATO --es vta_profile DEFAULT`, or `--es vta_preset "Morning Routine"`.
+
+Say *"set a timer on the TV to 15"* or *"start my Morning Routine preset"* to Hermes and it
+maps onto those commands (see the `visual-time-assistant` skill). Full parameter table,
+behaviour notes and verification steps are in **[AGENTS.md](AGENTS.md)**.
+
+Example agent conversation:
+
+> **You:** put 10 minutes on the TV
+> **Agent:** `./scripts/tv_timer.sh 10` → app opens on the running timer showing 09:5x
+
+> **You:** start the Bed Time preset
+> **Agent:** `./scripts/tv_preset.sh "Bed Time"` → resolves to 30 min, Space theme
 
 ## Tech stack
 
@@ -45,19 +103,6 @@ ui (Composables) → ViewModel (StateFlow) → Repository → Room DAO → SQLit
 One Compose UI adapts by window width: bottom navigation bar below 600 dp, navigation rail above.
 The running timer is full-screen with no chrome.
 
-## Automation (Hermes voice control)
-
-Saying *"set a timer on the TV to 15"* makes Hermes launch the app straight into a running
-timer over adb, using the deep link:
-
-```
-visualtime://timer?seconds=900&name=Morning%20Routine&theme=FOREST&profile=DEFAULT
-```
-
-- Equivalent extras: `--ei vta_seconds 900 --es vta_name Custom --es vta_theme FOREST`
-- Helper script: `./scripts/tv_timer.sh <minutes> [theme] [name]`
-- Unknown or out-of-range durations are ignored and the app opens normally.
-
 ## Build
 
 Requires JDK 17 and the Android SDK (compileSdk 35).
@@ -68,15 +113,15 @@ echo "sdk.dir=/path/to/Android/Sdk" > local.properties   # or set $ANDROID_HOME
 ./gradlew testDebugUnitTest        # JVM unit tests
 ```
 
-Release builds are signed with the debug key so they can be sideloaded onto a TV as-is.
+Release builds are signed with the debug key so they can be sideloaded as-is.
 
 ## Project layout
 
 ```
 app/src/main/java/com/ben0551/visualtimeassistant/
 ├── VisualTimeApp.kt            # @HiltAndroidApp, seeds presets/settings on first launch
-├── MainActivity.kt             # single activity, edge-to-edge Compose host
-├── data/                       # Room entities, DAOs, DB, repositories, mappers
+├── MainActivity.kt             # deep-link/intent entry point + edge-to-edge Compose host
+├── data/                       # Room entities, DAOs, DB (+ migration), repositories, mappers
 ├── domain/model/               # ThemeId, DisplayMode, WarningProfileId, settings, records
 ├── domain/stats/               # StatsCalculator (pure, unit tested)
 ├── timer/MilestoneEvaluator.kt # warning engine (pure, unit tested)
@@ -84,7 +129,7 @@ app/src/main/java/com/ben0551/visualtimeassistant/
 └── ui/
     ├── navigation/             # routes + adaptive shell (bottom bar / rail)
     ├── theme/                  # dark palette, high-contrast palette, progress ramp
-    ├── components/             # progress visuals, animated themes, D-pad focus helpers
+    ├── components/             # progress visuals, animated themes, remote-safe controls
     └── home|custom|running|presets|stats|settings/
 ```
 
@@ -97,10 +142,10 @@ the accumulated time before stopping the ticker.
 ### Data recorded per session
 
 `TimerSession` stores start/end timestamps, planned vs actual duration, overtime (signed),
-completed-on-time flag, theme, warning profile and display mode. Overtime is negative when a
-task finished early, which powers the "easiest tasks" list.
+completed-on-time flag, preset id/name, theme, warning profile and display mode. Overtime is
+negative when a task finished early, which powers the "easiest tasks" list.
 
-## Roadmap (post-1.0)
+## Roadmap
 
 Companion parent remote · child profiles · custom recorded parent voice · routine chains ·
 achievements · household sync · Wear OS notifications · AI duration recommendations.

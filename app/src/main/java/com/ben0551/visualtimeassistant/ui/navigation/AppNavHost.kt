@@ -67,8 +67,12 @@ object Routes {
     fun preset(preset: Preset): String =
         running(preset.durationSec, preset.id, preset.name, preset.theme, preset.warningProfile)
 
-    fun duration(seconds: Int, theme: ThemeId, name: String = ""): String =
-        running(seconds, null, name, theme, WarningProfileId.DEFAULT)
+    fun duration(
+        seconds: Int,
+        theme: ThemeId,
+        name: String = "",
+        presetId: Long? = null,
+    ): String = running(seconds, presetId, name, theme, WarningProfileId.DEFAULT)
 }
 
 @Composable
@@ -93,6 +97,7 @@ fun AppNavHost(
                         seconds = request.seconds,
                         theme = request.theme.resolve(),
                         name = request.presetName,
+                        presetId = request.presetId,
                     ),
                 )
             }.onFailure { error -> android.util.Log.e("VTALaunch", "navigate failed", error) }

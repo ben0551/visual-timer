@@ -27,6 +27,8 @@ data class AppSettings(
     val reducedMotion: Boolean = false,
     val colourBlindPalette: Boolean = false,
     val muteMode: Boolean = false,
+    /** Master switch for overtime: when off, "TIME IS UP" stops the timer where it is. */
+    val overtimeEnabled: Boolean = true,
 )
 
 /** One completed (or abandoned-but-expired) timer run. */
