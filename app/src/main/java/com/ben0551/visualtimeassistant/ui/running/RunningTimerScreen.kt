@@ -70,7 +70,9 @@ fun RunningTimerScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(totalSec, presetId, presetName, theme) {
-        viewModel.start(totalSec, presetId, presetName, theme.resolve(), warningProfile)
+        if (totalSec > 0) {
+            viewModel.start(totalSec, presetId, presetName, theme.resolve(), warningProfile)
+        }
     }
     LaunchedEffect(Unit) {
         viewModel.finished.collect { onExit() }

@@ -21,6 +21,7 @@ import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -35,6 +36,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ben0551.visualtimeassistant.domain.model.Preset
 import com.ben0551.visualtimeassistant.domain.model.ThemeId
+import com.ben0551.visualtimeassistant.domain.model.TimerRequest
 import com.ben0551.visualtimeassistant.domain.model.WarningProfileId
 import com.ben0551.visualtimeassistant.ui.custom.CustomTimerScreen
 import com.ben0551.visualtimeassistant.ui.home.HomeScreen
@@ -65,15 +67,34 @@ object Routes {
     fun preset(preset: Preset): String =
         running(preset.durationSec, preset.id, preset.name, preset.theme, preset.warningProfile)
 
-    fun duration(seconds: Int, theme: ThemeId): String =
-        running(seconds, null, "", theme, WarningProfileId.DEFAULT)
+    fun duration(seconds: Int, theme: ThemeId, name: String = ""): String =
+        running(seconds, null, name, theme, WarningProfileId.DEFAULT)
 }
 
 @Composable
-fun AppNavHost() {
+fun AppNavHost(
+    initialTimerRequest: TimerRequest? = null,
+    onTimerRequestConsumed: () -> Unit = {},
+) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
+
+    // Automation entry point: a deep link/intent launches straight into the timer.
+    LaunchedEffect(initialTimerRequest) {
+        initialTimerRequest?.let { request ->
+            runCatching {
+                navController.navigate(
+                    Routes.duration(
+                        seconds = request.seconds,
+                        theme = request.theme.resolve(),
+                        name = request.presetName,
+                    ),
+                )
+            }.onFailure { error -> android.util.Log.e("VTALaunch", "navigate failed", error) }
+            onTimerRequestConsumed()
+        }
+    }
 
     // The timer is full-screen with no chrome so the countdown owns the room.
     if (currentRoute?.startsWith("running/") == true) {

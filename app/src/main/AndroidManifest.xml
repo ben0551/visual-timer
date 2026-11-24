@@ -26,6 +26,7 @@
             android:launchMode="singleTask"
             android:theme="@style/Theme.VisualTimeAssistant"
             android:windowSoftInputMode="adjustResize">
+            <!-- Standard launcher entry (phone / tablet). -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -34,6 +35,15 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+            <!-- Automation entry point used by Hermes:
+                 adb shell am start -a android.intent.action.VIEW \
+                   -d "visualtime://timer?seconds=900&name=Custom&theme=FOREST" -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="visualtime" android:host="timer" />
             </intent-filter>
         </activity>
     </application>

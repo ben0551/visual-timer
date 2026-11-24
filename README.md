@@ -38,6 +38,19 @@ ui (Composables) → ViewModel (StateFlow) → Repository → Room DAO → SQLit
 One Compose UI adapts by window width: bottom navigation bar below 600 dp, navigation rail above.
 The running timer is full-screen with no chrome.
 
+## Automation (Hermes voice control)
+
+Saying *"set a timer on the TV to 15"* makes Hermes launch the app straight into a running
+timer over adb, using the deep link:
+
+```
+visualtime://timer?seconds=900&name=Morning%20Routine&theme=FOREST&profile=DEFAULT
+```
+
+- Equivalent extras: `--ei vta_seconds 900 --es vta_name Custom --es vta_theme FOREST`
+- Helper script: `./scripts/tv_timer.sh <minutes> [theme] [name]`
+- Unknown or out-of-range durations are ignored and the app opens normally.
+
 ## Build
 
 Requires JDK 17 and the Android SDK (compileSdk 35).

@@ -85,7 +85,7 @@ class RunningTimerViewModel @Inject constructor(
     private var recorded = false
     private var started = false
 
-    /** Called once by the screen with its nav arguments. */
+    /** Called once per composition with the nav arguments; restarts if they change. */
     fun start(
         totalSec: Int,
         presetId: Long?,
@@ -93,7 +93,18 @@ class RunningTimerViewModel @Inject constructor(
         theme: ThemeId,
         warningProfile: WarningProfileId,
     ) {
-        if (started) return
+        val resolvedTheme = theme.resolve()
+        val displayName = presetName.ifBlank { "Custom Timer" }
+        // Navigation composes the destination once with default arguments before the real
+        // ones land; ignore no-op repeats but re-configure when the request differs.
+        if (started &&
+            _uiState.value.totalSec == totalSec &&
+            _uiState.value.presetName == displayName &&
+            _uiState.value.displayTheme == resolvedTheme &&
+            this.warningProfile == warningProfile
+        ) {
+            return
+        }
         started = true
         this.presetId = presetId
         this.warningProfile = warningProfile
@@ -115,7 +126,7 @@ class RunningTimerViewModel @Inject constructor(
                 totalSec = totalSec,
                 remainingSec = totalSec,
                 phase = TimerUiState.Phase.RUNNING,
-                presetName = presetName.ifBlank { "Custom Timer" },
+                presetName = displayName,
                 displayTheme = theme,
                 dadModeThresholdPercent = settings.dadModeThresholdPercent,
                 displayMode = settings.displayMode,
@@ -181,7 +192,7 @@ class RunningTimerViewModel @Inject constructor(
             warningProfileId = warningProfile,
             displayMode = settings.displayMode,
         )
-        viewModelScope.launch { timerRepository.record(session) }
+        timerRepository.record(session)
     }
 
     private fun startTicking() {
