@@ -48,6 +48,8 @@ import com.ben0551.visualtimeassistant.data.parseMilestones
 import com.ben0551.visualtimeassistant.domain.model.DisplayMode
 import com.ben0551.visualtimeassistant.domain.model.ThemeId
 import com.ben0551.visualtimeassistant.domain.model.TimerLimits
+import com.ben0551.visualtimeassistant.ui.components.TvFilterChip
+import com.ben0551.visualtimeassistant.ui.components.TvSecondaryButton
 import com.ben0551.visualtimeassistant.ui.components.tvFocusScale
 
 /**
@@ -177,7 +179,7 @@ fun SettingsScreen() {
         }
 
         item {
-            OutlinedButton(
+            TvSecondaryButton(
                 onClick = { viewModel.resetToDefaults() },
                 modifier = Modifier.fillMaxWidth().height(56.dp).tvFocusScale(cornerRadius = 16.dp),
             ) {
@@ -267,15 +269,10 @@ private fun ChoiceRow(
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             options.forEach { (key, label) ->
-                FilterChip(
+                TvFilterChip(
                     selected = selectedKey == key,
                     onClick = { onSelect(key) },
-                    label = { Text(label) },
-                    leadingIcon = if (selectedKey == key) {
-                        { Icon(Icons.Rounded.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
-                    } else {
-                        null
-                    },
+                    label = label,
                 )
             }
         }
@@ -311,20 +308,14 @@ private fun MilestonesEditor(
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             presets.forEach { (label, values) ->
-                val isSelected = milestones == values
-                FilterChip(
-                    selected = isSelected,
+                TvFilterChip(
+                    selected = milestones == values,
                     onClick = {
                         text = values.joinToString(", ")
                         error = null
                         onApply(values)
                     },
-                    label = { Text(label) },
-                    leadingIcon = if (isSelected) {
-                        { Icon(Icons.Rounded.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
-                    } else {
-                        null
-                    },
+                    label = label,
                 )
             }
         }
@@ -355,9 +346,9 @@ private fun MilestonesEditor(
             Text(error!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
         }
         Spacer(Modifier.height(8.dp))
-        Button(
-            enabled = error == null && parseMilestones(text).isNotEmpty(),
+        TvSecondaryButton(
             onClick = { onApply(parseMilestones(text)) },
+            enabled = error == null && parseMilestones(text).isNotEmpty(),
             modifier = Modifier.height(48.dp).tvFocusScale(cornerRadius = 14.dp),
         ) {
             Text("APPLY CUSTOM")
@@ -387,7 +378,7 @@ private fun DadModeThresholdRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            OutlinedButton(
+            TvSecondaryButton(
                 onClick = { commit(draft.toInt() - STEP) },
                 modifier = Modifier.size(56.dp).tvFocusScale(cornerRadius = 16.dp),
             ) {
@@ -401,7 +392,7 @@ private fun DadModeThresholdRow(
                 steps = max - min - 1,
                 modifier = Modifier.weight(1f),
             )
-            OutlinedButton(
+            TvSecondaryButton(
                 onClick = { commit(draft.toInt() + STEP) },
                 modifier = Modifier.size(56.dp).tvFocusScale(cornerRadius = 16.dp),
             ) {

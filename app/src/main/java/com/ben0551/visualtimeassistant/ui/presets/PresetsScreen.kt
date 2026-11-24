@@ -2,6 +2,8 @@ package com.ben0551.visualtimeassistant.ui.presets
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -46,6 +48,7 @@ import com.ben0551.visualtimeassistant.domain.model.ThemeId
 import com.ben0551.visualtimeassistant.domain.model.TimerLimits
 import com.ben0551.visualtimeassistant.domain.model.WarningProfileId
 import com.ben0551.visualtimeassistant.ui.components.StepperRow
+import com.ben0551.visualtimeassistant.ui.components.TvFilterChip
 import com.ben0551.visualtimeassistant.ui.components.tvFocusScale
 import com.ben0551.visualtimeassistant.util.DurationFormatter
 
@@ -169,6 +172,7 @@ fun PresetsScreen(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun PresetEditorDialog(
     initial: Preset,
@@ -232,12 +236,15 @@ private fun PresetEditorDialog(
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                 )
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
                     ThemeId.selectable().take(5).forEach { option ->
-                        FilterChip(
+                        TvFilterChip(
                             selected = theme == option,
                             onClick = { theme = option },
-                            label = { Text(option.displayName) },
+                            label = option.displayName,
                         )
                     }
                 }
@@ -247,12 +254,15 @@ private fun PresetEditorDialog(
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                 )
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
                     WarningProfileId.entries.forEach { option ->
-                        FilterChip(
+                        TvFilterChip(
                             selected = profile == option,
                             onClick = { profile = option },
-                            label = { Text(option.label) },
+                            label = option.label,
                         )
                     }
                 }

@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ben0551.visualtimeassistant.domain.model.ThemeId
+import com.ben0551.visualtimeassistant.ui.components.TvFilterChip
+import com.ben0551.visualtimeassistant.ui.components.TvSecondaryButton
 import com.ben0551.visualtimeassistant.ui.components.tvFocusScale
 import com.ben0551.visualtimeassistant.util.DurationFormatter
 
@@ -99,10 +101,10 @@ fun CustomTimerScreen(
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     ThemeId.selectable().forEach { theme ->
-                        FilterChip(
+                        TvFilterChip(
                             selected = state.theme == theme,
                             onClick = { viewModel.setTheme(theme) },
-                            label = { Text(theme.displayName) },
+                            label = theme.displayName,
                         )
                     }
                 }
@@ -124,10 +126,10 @@ fun CustomTimerScreen(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     listOf(1, 2, 5, 10, 15, 30).forEach { minutes ->
-                        FilterChip(
+                        TvFilterChip(
                             selected = state.minutes == minutes && state.hours == 0 && state.seconds == 0,
                             onClick = { viewModel.applyQuickMinutes(minutes) },
-                            label = { Text("$minutes MIN") },
+                            label = "$minutes MIN",
                         )
                     }
                 }
@@ -157,7 +159,7 @@ fun CustomTimerScreen(
                     Text("START TIMER", style = MaterialTheme.typography.titleLarge)
                 }
                 Spacer(Modifier.height(8.dp))
-                OutlinedButton(
+                TvSecondaryButton(
                     onClick = onBack,
                     modifier = Modifier.fillMaxWidth().height(52.dp),
                 ) {

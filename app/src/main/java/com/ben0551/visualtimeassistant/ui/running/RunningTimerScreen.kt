@@ -56,6 +56,7 @@ import com.ben0551.visualtimeassistant.ui.components.CircularCountdown
 import com.ben0551.visualtimeassistant.ui.components.CombinedProgress
 import com.ben0551.visualtimeassistant.ui.components.ElapsedProgressBar
 import com.ben0551.visualtimeassistant.ui.components.tvFocusScale
+import com.ben0551.visualtimeassistant.ui.components.TvSecondaryButton
 import com.ben0551.visualtimeassistant.ui.theme.ProgressPalette
 import com.ben0551.visualtimeassistant.util.DurationFormatter
 
@@ -294,13 +295,13 @@ fun RunningTimerScreen(
                         fontSize = 18.sp,
                     )
                 }
-                OutlinedButton(
+                TvSecondaryButton(
                     onClick = { viewModel.abandon() },
                     modifier = Modifier.height(72.dp).width(120.dp).tvFocusScale(cornerRadius = 20.dp),
                 ) {
                     Text("STOP", fontSize = 18.sp)
                 }
-                OutlinedButton(
+                TvSecondaryButton(
                     onClick = { viewModel.toggleMute() },
                     modifier = Modifier.height(72.dp).width(160.dp).tvFocusScale(cornerRadius = 20.dp),
                 ) {

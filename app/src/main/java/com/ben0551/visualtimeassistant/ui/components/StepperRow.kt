@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Remove
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -41,7 +41,7 @@ fun StepperRow(
         )
         Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            OutlinedButton(
+            FilledTonalButton(
                 onClick = onMinus,
                 modifier = Modifier.size(buttonSize).tvFocusScale(cornerRadius = 16.dp),
                 contentPadding = PaddingValues(0.dp),
@@ -51,7 +51,7 @@ fun StepperRow(
             Spacer(Modifier.width(16.dp))
             Text(valueText, style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Bold)
             Spacer(Modifier.width(16.dp))
-            OutlinedButton(
+            FilledTonalButton(
                 onClick = onPlus,
                 modifier = Modifier.size(buttonSize).tvFocusScale(cornerRadius = 16.dp),
                 contentPadding = PaddingValues(0.dp),
