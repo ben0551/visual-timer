@@ -8,6 +8,13 @@ block countdown and an animated environment (a plant growing, a rocket climbing,
 appearing in an aquarium...). When the timer expires, overtime keeps counting so parents get
 real data about how long tasks actually take.
 
+## Screenshots
+
+| Android tablet (portrait-class layout) | Android TV |
+| --- | --- |
+| ![Home - quick start cards](docs/screenshots/home-tablet.png) | ![Settings - remote-first controls](docs/screenshots/settings-tv.png) |
+| ![Running timer with wrapped controls](docs/screenshots/timer-tablet.png) | ![Statistics dashboard](docs/screenshots/statistics-tv.png) |
+
 ## Features (v1.0)
 
 | Area | What's implemented |
