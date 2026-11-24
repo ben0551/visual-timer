@@ -1,17 +1,27 @@
 package com.ben0551.visualtimeassistant.ui.settings
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -25,16 +35,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ben0551.visualtimeassistant.data.parseMilestones
-import com.ben0551.visualtimeassistant.domain.model.AppSettings
 import com.ben0551.visualtimeassistant.domain.model.DisplayMode
 import com.ben0551.visualtimeassistant.domain.model.ThemeId
 import com.ben0551.visualtimeassistant.domain.model.TimerLimits
+import com.ben0551.visualtimeassistant.ui.components.tvFocusScale
 
+/**
+ * Settings built for the remote: every option is either a whole-row toggle or a chip that
+ * can be reached in one or two D-Pad moves - no tiny switches, no typing on a TV keyboard.
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen() {
     val viewModel: SettingsViewModel = hiltViewModel()
@@ -55,7 +71,7 @@ fun SettingsScreen() {
 
         item { SectionTitle("DISPLAY") }
         item {
-            SwitchRow(
+            ToggleRow(
                 title = "Show countdown",
                 subtitle = "Large remaining-time number",
                 checked = settings.showCountdown,
@@ -63,7 +79,7 @@ fun SettingsScreen() {
             )
         }
         item {
-            SwitchRow(
+            ToggleRow(
                 title = "Show percentage",
                 subtitle = "Percent of time left under the progress display",
                 checked = settings.showPercentage,
@@ -71,43 +87,49 @@ fun SettingsScreen() {
             )
         }
         item {
-            SwitchRow(
+            ToggleRow(
                 title = "Show progress bar",
                 subtitle = "Elapsed-time growth bar",
                 checked = settings.showProgressBar,
                 onChange = { value -> viewModel.update { it.copy(showProgressBar = value) } },
             )
         }
-        item { ChoiceRow(
-            title = "Progress style",
-            options = DisplayMode.entries.map { it.name to it.label },
-            selectedKey = settings.displayMode.name,
-            onSelect = { key -> viewModel.update { it.copy(displayMode = DisplayMode.valueOf(key)) } },
-        ) }
+        item {
+            ChoiceRow(
+                title = "Progress style",
+                options = DisplayMode.entries.map { it.name to it.label },
+                selectedKey = settings.displayMode.name,
+                onSelect = { key -> viewModel.update { it.copy(displayMode = DisplayMode.valueOf(key)) } },
+            )
+        }
 
         item { SectionTitle("THEME") }
-        item { ChoiceRow(
-            title = "Animated environment",
-            options = ThemeId.selectable().map { it.name to it.displayName },
-            selectedKey = settings.theme.name,
-            onSelect = { key -> viewModel.update { it.copy(theme = ThemeId.valueOf(key) ) } },
-        ) }
+        item {
+            ChoiceRow(
+                title = "Animated environment",
+                options = ThemeId.selectable().map { it.name to it.displayName },
+                selectedKey = settings.theme.name,
+                onSelect = { key -> viewModel.update { it.copy(theme = ThemeId.valueOf(key)) } },
+            )
+        }
 
         item { SectionTitle("NOTIFICATIONS") }
         item {
-            SwitchRow(
+            ToggleRow(
                 title = "Voice prompts",
                 subtitle = "Spoken announcements at milestones",
                 checked = settings.voiceEnabled,
                 onChange = { value -> viewModel.update { it.copy(voiceEnabled = value) } },
             )
         }
-        item { MilestonesEditor(
-            milestones = settings.customMilestones,
-            onApply = { values -> viewModel.update { it.copy(customMilestones = values) } },
-        ) }
         item {
-            SwitchRow(
+            MilestonesEditor(
+                milestones = settings.customMilestones,
+                onApply = { values -> viewModel.update { it.copy(customMilestones = values) } },
+            )
+        }
+        item {
+            ToggleRow(
                 title = "Dad Mode",
                 subtitle = "Extra urgency layer near the end",
                 checked = settings.dadModeEnabled,
@@ -115,28 +137,45 @@ fun SettingsScreen() {
             )
         }
         if (settings.dadModeEnabled) {
-            item { DadModeThresholdRow(
-                thresholdPercent = settings.dadModeThresholdPercent,
-                onChange = { value -> viewModel.update { it.copy(dadModeThresholdPercent = value) } },
-            ) }
+            item {
+                DadModeThresholdRow(
+                    thresholdPercent = settings.dadModeThresholdPercent,
+                    onChange = { value -> viewModel.update { it.copy(dadModeThresholdPercent = value) } },
+                )
+            }
         }
 
         item { SectionTitle("ACCESSIBILITY") }
-        item { SwitchRow("High contrast", "Pure black and white surfaces",
-            settings.highContrast) { v -> viewModel.update { it.copy(highContrast = v) } } }
-        item { SwitchRow("Large text", "Bigger countdown and labels",
-            settings.largeText) { v -> viewModel.update { it.copy(largeText = v) } } }
-        item { SwitchRow("Reduced motion", "No flashing or animated movement",
-            settings.reducedMotion) { v -> viewModel.update { it.copy(reducedMotion = v) } } }
-        item { SwitchRow("Colour-blind palette", "Okabe-Ito hues instead of green-amber-red",
-            settings.colourBlindPalette) { v -> viewModel.update { it.copy(colourBlindPalette = v) } } }
-        item { SwitchRow("Mute mode", "Silence every sound including voice",
-            settings.muteMode) { v -> viewModel.update { it.copy(muteMode = v) } } }
+        item {
+            ToggleRow("High contrast", "Pure black and white surfaces", settings.highContrast) { v ->
+                viewModel.update { it.copy(highContrast = v) }
+            }
+        }
+        item {
+            ToggleRow("Large text", "Bigger countdown and labels", settings.largeText) { v ->
+                viewModel.update { it.copy(largeText = v) }
+            }
+        }
+        item {
+            ToggleRow("Reduced motion", "No flashing or animated movement", settings.reducedMotion) { v ->
+                viewModel.update { it.copy(reducedMotion = v) }
+            }
+        }
+        item {
+            ToggleRow("Colour-blind palette", "Okabe-Ito hues instead of green-amber-red", settings.colourBlindPalette) { v ->
+                viewModel.update { it.copy(colourBlindPalette = v) }
+            }
+        }
+        item {
+            ToggleRow("Mute mode", "Silence every sound including voice", settings.muteMode) { v ->
+                viewModel.update { it.copy(muteMode = v) }
+            }
+        }
 
         item {
             OutlinedButton(
                 onClick = { viewModel.resetToDefaults() },
-                modifier = Modifier.fillMaxWidth().height(52.dp),
+                modifier = Modifier.fillMaxWidth().height(56.dp).tvFocusScale(cornerRadius = 16.dp),
             ) {
                 Text("RESET TO DEFAULTS")
             }
@@ -154,15 +193,27 @@ private fun SectionTitle(text: String) {
     )
 }
 
+/** Whole row toggles on OK - the switch itself is just the visual state. */
 @Composable
-private fun SwitchRow(
+private fun ToggleRow(
     title: String,
     subtitle: String?,
     checked: Boolean,
     onChange: (Boolean) -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 64.dp)
+            .toggleable(
+                value = checked,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                role = Role.Switch,
+                onValueChange = onChange,
+            )
+            .tvFocusScale(cornerRadius = 16.dp)
+            .padding(horizontal = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -176,11 +227,12 @@ private fun SwitchRow(
                 )
             }
         }
-        Switch(checked = checked, onCheckedChange = onChange)
+        Switch(checked = checked, onCheckedChange = null)
     }
 }
 
-/** Chip row for enum-like choices. */
+/** Chips wrap across the screen so nothing hides off-scroll. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ChoiceRow(
     title: String,
@@ -191,7 +243,10 @@ private fun ChoiceRow(
     Column {
         Text(title, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(8.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
             options.forEach { (key, label) ->
                 FilterChip(
                     selected = selectedKey == key,
@@ -203,6 +258,7 @@ private fun ChoiceRow(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun MilestonesEditor(
     milestones: List<Int>,
@@ -211,10 +267,41 @@ private fun MilestonesEditor(
     var text by remember(milestones) { mutableStateOf(milestones.joinToString(", ")) }
     var error by remember { mutableStateOf<String?>(null) }
 
+    val presets = listOf(
+        "50 / 100" to listOf(50, 100),
+        "25 / 50 / 75 / 100" to listOf(25, 50, 75, 100),
+        "20 / 40 / 60 / 80" to listOf(20, 40, 60, 80),
+        "Every 10%" to (10..90 step 10).toList(),
+    )
+
     Column {
-        Text("Custom voice milestones", fontWeight = FontWeight.Bold)
+        Text("Voice milestone presets", fontWeight = FontWeight.Bold)
         Text(
-            "Percentages that trigger a spoken announcement, e.g. 20, 40, 60, 80.",
+            "One press applies a common set.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(8.dp))
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            presets.forEach { (label, values) ->
+                FilterChip(
+                    selected = milestones == values,
+                    onClick = {
+                        text = values.joinToString(", ")
+                        error = null
+                        onApply(values)
+                    },
+                    label = { Text(label) },
+                )
+            }
+        }
+        Spacer(Modifier.height(12.dp))
+        Text("Custom values", fontWeight = FontWeight.Bold)
+        Text(
+            "Comma separated percentages, e.g. 15, 30, 45.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -238,46 +325,59 @@ private fun MilestonesEditor(
             Text(error!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
         }
         Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf("20, 40, 60, 80" to listOf(20, 40, 60, 80), "25, 50, 75" to listOf(25, 50, 75)).forEach { (label, values) ->
-                FilterChip(
-                    selected = milestones == values,
-                    onClick = {
-                        text = values.joinToString(", ")
-                        error = null
-                        onApply(values)
-                    },
-                    label = { Text(label) },
-                )
-            }
-            Button(
-                enabled = error == null && parseMilestones(text).isNotEmpty(),
-                onClick = { onApply(parseMilestones(text)) },
-            ) {
-                Text("APPLY")
-            }
+        Button(
+            enabled = error == null && parseMilestones(text).isNotEmpty(),
+            onClick = { onApply(parseMilestones(text)) },
+            modifier = Modifier.height(48.dp).tvFocusScale(cornerRadius = 14.dp),
+        ) {
+            Text("APPLY CUSTOM")
         }
     }
 }
 
+/** Slider plus big +/- buttons: precise with a remote, fast with a touchscreen. */
 @Composable
 private fun DadModeThresholdRow(
     thresholdPercent: Int,
     onChange: (Int) -> Unit,
 ) {
     var draft by remember(thresholdPercent) { mutableStateOf(thresholdPercent.toFloat()) }
+    val min = TimerLimits.DAD_MODE_MIN_THRESHOLD_PERCENT
+    val max = TimerLimits.DAD_MODE_MAX_THRESHOLD_PERCENT
+
+    fun commit(value: Int) {
+        val clamped = value.coerceIn(min, max)
+        draft = clamped.toFloat()
+        onChange(clamped)
+    }
+
     Column {
         Text("Dad Mode threshold: ${draft.toInt()}%", fontWeight = FontWeight.Bold)
-        Slider(
-            value = draft,
-            onValueChange = { draft = it },
-            onValueChangeFinished = { onChange(draft.toInt().coerceIn(
-                TimerLimits.DAD_MODE_MIN_THRESHOLD_PERCENT,
-                TimerLimits.DAD_MODE_MAX_THRESHOLD_PERCENT,
-            )) },
-            valueRange = TimerLimits.DAD_MODE_MIN_THRESHOLD_PERCENT.toFloat()..TimerLimits.DAD_MODE_MAX_THRESHOLD_PERCENT.toFloat(),
-            steps = TimerLimits.DAD_MODE_MAX_THRESHOLD_PERCENT - TimerLimits.DAD_MODE_MIN_THRESHOLD_PERCENT - 1,
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            OutlinedButton(
+                onClick = { commit(draft.toInt() - STEP) },
+                modifier = Modifier.size(56.dp).tvFocusScale(cornerRadius = 16.dp),
+            ) {
+                Icon(Icons.Rounded.Remove, contentDescription = "Lower threshold")
+            }
+            Slider(
+                value = draft,
+                onValueChange = { draft = it },
+                onValueChangeFinished = { commit(draft.toInt()) },
+                valueRange = min.toFloat()..max.toFloat(),
+                steps = max - min - 1,
+                modifier = Modifier.weight(1f),
+            )
+            OutlinedButton(
+                onClick = { commit(draft.toInt() + STEP) },
+                modifier = Modifier.size(56.dp).tvFocusScale(cornerRadius = 16.dp),
+            ) {
+                Icon(Icons.Rounded.Add, contentDescription = "Raise threshold")
+            }
+        }
         Text(
             "Lower percentages mean a calmer timer; 5% is the default.",
             style = MaterialTheme.typography.bodyMedium,
@@ -285,3 +385,5 @@ private fun DadModeThresholdRow(
         )
     }
 }
+
+private const val STEP = 5
