@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
 import com.ben0551.visualtimeassistant.data.repo.PresetRepository
+import com.ben0551.visualtimeassistant.domain.model.ClockTime
 import com.ben0551.visualtimeassistant.domain.model.TimerRequest
 import com.ben0551.visualtimeassistant.ui.navigation.AppNavHost
 import com.ben0551.visualtimeassistant.ui.theme.VisualTimeAssistantTheme
@@ -47,9 +48,10 @@ class MainActivity : ComponentActivity() {
     /**
      * Accepts either the deep link
      * `visualtime://timer?seconds=900&name=Custom&theme=FOREST&profile=DEFAULT`
-     * (add `preset=Morning%20Routine` to launch a stored preset)
+     * (add `preset=Morning%20Routine` to launch a stored preset, or `until=8:45` for a
+     * wall-clock target that becomes an "8:45 Timer" countdown)
      * or the raw extras `vta_seconds`, `vta_name`, `vta_theme`, `vta_profile`,
-     * `vta_preset_id` / `vta_preset`.
+     * `vta_preset_id` / `vta_preset`, `vta_until`.
      */
     private fun handleIntent(intent: Intent?) {
         if (intent == null) return
@@ -63,17 +65,20 @@ class MainActivity : ComponentActivity() {
                     profile = data.getQueryParameter("profile"),
                     presetId = data.getQueryParameter("presetId")?.toLongOrNull(),
                     preset = data.getQueryParameter("preset"),
+                    until = data.getQueryParameter("until"),
                 )
 
             intent.hasExtra(TimerRequest.EXTRA_SECONDS) ||
                 intent.hasExtra(TimerRequest.EXTRA_PRESET) ||
-                intent.hasExtra(TimerRequest.EXTRA_PRESET_ID) -> TimerRequest.fromIntentExtras(
+                intent.hasExtra(TimerRequest.EXTRA_PRESET_ID) ||
+                intent.hasExtra(TimerRequest.EXTRA_UNTIL) -> TimerRequest.fromIntentExtras(
                 seconds = intent.extras?.get(TimerRequest.EXTRA_SECONDS).toSecondsOrNull(),
                 name = intent.extras?.get(TimerRequest.EXTRA_NAME)?.toString(),
                 theme = intent.extras?.get(TimerRequest.EXTRA_THEME)?.toString(),
                 profile = intent.extras?.get(TimerRequest.EXTRA_PROFILE)?.toString(),
                 presetId = intent.extras?.get(TimerRequest.EXTRA_PRESET_ID).toPresetIdOrNull(),
                 preset = intent.extras?.get(TimerRequest.EXTRA_PRESET)?.toString(),
+                until = intent.extras?.get(TimerRequest.EXTRA_UNTIL)?.toString(),
             )
 
             else -> null
@@ -98,8 +103,25 @@ class MainActivity : ComponentActivity() {
                 }
             }
         } else {
-            timerRequest = request
+            timerRequest = request.resolveClockTime()
         }
+    }
+
+    /**
+     * "Set a timer for 8:45": turn the wall-clock target into a countdown that starts now
+     * and title it after the requested time. A malformed or impossible target is ignored,
+     * which just opens the app normally.
+     */
+    private fun TimerRequest.resolveClockTime(): TimerRequest? {
+        val clock = until ?: return this
+        val seconds = ClockTime.secondsUntil(clock, System.currentTimeMillis()) ?: return null
+        return copy(
+            seconds = seconds,
+            presetName = "$clock Timer",
+            presetSelector = null,
+            presetId = null,
+            until = null,
+        )
     }
 
     private fun Any?.toSecondsOrNull(): Int? = when (this) {

@@ -76,6 +76,17 @@ class TimerRequestTest {
     }
 
     @Test
+    fun `wall clock targets are carried for the app to resolve`() {
+        val request = TimerRequest.fromQueryParameters(null, null, null, null, until = "8:45")
+
+        assertEquals("8:45", request.until)
+        assertTrue(request.isValid)
+
+        val padded = TimerRequest.fromQueryParameters(null, null, null, null, until = " 8:45 ")
+        assertEquals("8:45", padded.until)
+    }
+
+    @Test
     fun `random theme resolves to a concrete theme`() {
         val resolved = TimerRequest(seconds = 900, theme = ThemeId.RANDOM).theme.resolve()
         assertTrue(resolved != ThemeId.RANDOM)

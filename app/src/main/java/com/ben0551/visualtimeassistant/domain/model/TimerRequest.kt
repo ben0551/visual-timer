@@ -14,10 +14,13 @@ data class TimerRequest(
     val warningProfile: WarningProfileId = WarningProfileId.DEFAULT,
     val presetId: Long? = null,
     val presetSelector: String? = null,
+    /** Wall-clock target ("8:45") - resolved to [seconds] by the app using the device clock. */
+    val until: String? = null,
 ) {
     val isValid: Boolean
         get() = seconds in TimerLimits.MIN_SECONDS..TimerLimits.MAX_SECONDS ||
-            presetSelector != null
+            presetSelector != null ||
+            !until.isNullOrBlank()
 
     companion object {
         const val EXTRA_SECONDS = "vta_seconds"
@@ -26,6 +29,7 @@ data class TimerRequest(
         const val EXTRA_PROFILE = "vta_profile"
         const val EXTRA_PRESET_ID = "vta_preset_id"
         const val EXTRA_PRESET = "vta_preset"
+        const val EXTRA_UNTIL = "vta_until"
 
         /** Accepts either the deep link query params or raw intent extras. */
         fun fromQueryParameters(
@@ -35,6 +39,7 @@ data class TimerRequest(
             profile: String?,
             presetId: Long? = null,
             preset: String? = null,
+            until: String? = null,
         ): TimerRequest = TimerRequest(
             seconds = seconds ?: TimerLimits.MIN_SECONDS,
             presetName = name?.takeIf { it.isNotBlank() } ?: "Custom Timer",
@@ -42,6 +47,7 @@ data class TimerRequest(
             warningProfile = WarningProfileId.fromName(profile),
             presetId = presetId?.takeIf { it > 0 },
             presetSelector = preset?.takeIf { it.isNotBlank() },
+            until = until?.trim()?.takeIf { it.isNotBlank() },
         )
 
         fun fromIntentExtras(
@@ -51,6 +57,7 @@ data class TimerRequest(
             profile: String?,
             presetId: Long? = null,
             preset: String? = null,
-        ): TimerRequest = fromQueryParameters(seconds, name, theme, profile, presetId, preset)
+            until: String? = null,
+        ): TimerRequest = fromQueryParameters(seconds, name, theme, profile, presetId, preset, until)
     }
 }

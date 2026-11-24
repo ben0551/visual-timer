@@ -69,6 +69,7 @@ skill for it; other harnesses just run the repo scripts.
 
 ```bash
 ./scripts/tv_timer.sh 15 POTATO "Morning Routine"   # 15 minutes, potato theme
+./scripts/tv_timer.sh 8:45                          # countdown until 8:45 ("8:45 Timer")
 ./scripts/tv_preset.sh "Morning Routine"            # launch the stored preset
 ```
 
@@ -77,14 +78,18 @@ Deep link / intent contract:
 ```
 visualtime://timer?seconds=900&name=Morning%20Routine&theme=POTATO&profile=DEFAULT
 visualtime://timer?preset=Morning%20Routine          # resolve a stored preset by name/id
+visualtime://timer?until=8:45                        # wall-clock target -> countdown to 8:45
 ```
 
 Extras equivalent: `--ei vta_seconds 900 --es vta_name "Morning Routine"
---es vta_theme POTATO --es vta_profile DEFAULT`, or `--es vta_preset "Morning Routine"`.
+--es vta_theme POTATO --es vta_profile DEFAULT`, `--es vta_preset "Morning Routine"`,
+or `--es vta_until "8:45"` (the app works out the remaining time and titles it
+`8:45 Timer`; a time that has already passed counts down to tomorrow's).
 
-Say *"set a timer on the TV to 15"* or *"start my Morning Routine preset"* to Hermes and it
-maps onto those commands (see the `visual-time-assistant` skill). Full parameter table,
-behaviour notes and verification steps are in **[AGENTS.md](AGENTS.md)**.
+Say *"set a timer on the TV to 15"*, *"dinner at 8:45"* or *"start my Morning Routine
+preset"* to Hermes and it maps onto those commands (see the `visual-time-assistant`
+skill). Full parameter table, behaviour notes and verification steps are in
+**[AGENTS.md](AGENTS.md)**.
 
 Example agent conversation:
 
@@ -93,6 +98,9 @@ Example agent conversation:
 
 > **You:** start the Bed Time preset
 > **Agent:** `./scripts/tv_preset.sh "Bed Time"` → resolves to 30 min, Space theme
+
+> **You:** shower at 6:15
+> **Agent:** `./scripts/tv_timer.sh 6:15` → countdown from now until 6:15, titled 6:15 TIMER
 
 ## Tech stack
 
