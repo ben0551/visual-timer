@@ -1,5 +1,7 @@
 package com.ben0551.visualtimeassistant.ui.settings
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,10 +16,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
@@ -50,7 +54,7 @@ import com.ben0551.visualtimeassistant.ui.components.tvFocusScale
  * Settings built for the remote: every option is either a whole-row toggle or a chip that
  * can be reached in one or two D-Pad moves - no tiny switches, no typing on a TV keyboard.
  */
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun SettingsScreen() {
     val viewModel: SettingsViewModel = hiltViewModel()
@@ -69,7 +73,7 @@ fun SettingsScreen() {
             )
         }
 
-        item { SectionTitle("DISPLAY") }
+        stickyHeader { SectionTitle("DISPLAY") }
         item {
             ToggleRow(
                 title = "Show countdown",
@@ -103,7 +107,7 @@ fun SettingsScreen() {
             )
         }
 
-        item { SectionTitle("THEME") }
+        stickyHeader { SectionTitle("THEME") }
         item {
             ChoiceRow(
                 title = "Animated environment",
@@ -113,7 +117,7 @@ fun SettingsScreen() {
             )
         }
 
-        item { SectionTitle("NOTIFICATIONS") }
+        stickyHeader { SectionTitle("NOTIFICATIONS") }
         item {
             ToggleRow(
                 title = "Voice prompts",
@@ -145,7 +149,7 @@ fun SettingsScreen() {
             }
         }
 
-        item { SectionTitle("ACCESSIBILITY") }
+        stickyHeader { SectionTitle("ACCESSIBILITY") }
         item {
             ToggleRow("High contrast", "Pure black and white surfaces", settings.highContrast) { v ->
                 viewModel.update { it.copy(highContrast = v) }
@@ -190,6 +194,11 @@ private fun SectionTitle(text: String) {
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.primary,
         fontWeight = FontWeight.Bold,
+        // Solid surface so content scrolling underneath the sticky header stays hidden.
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
     )
 }
 
@@ -227,7 +236,17 @@ private fun ToggleRow(
                 )
             }
         }
-        Switch(checked = checked, onCheckedChange = null)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                if (checked) "ON" else "OFF",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = if (checked) MaterialTheme.colorScheme.secondary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.width(8.dp))
+            Switch(checked = checked, onCheckedChange = null)
+        }
     }
 }
 
@@ -252,6 +271,11 @@ private fun ChoiceRow(
                     selected = selectedKey == key,
                     onClick = { onSelect(key) },
                     label = { Text(label) },
+                    leadingIcon = if (selectedKey == key) {
+                        { Icon(Icons.Rounded.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                    } else {
+                        null
+                    },
                 )
             }
         }
@@ -287,14 +311,20 @@ private fun MilestonesEditor(
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             presets.forEach { (label, values) ->
+                val isSelected = milestones == values
                 FilterChip(
-                    selected = milestones == values,
+                    selected = isSelected,
                     onClick = {
                         text = values.joinToString(", ")
                         error = null
                         onApply(values)
                     },
                     label = { Text(label) },
+                    leadingIcon = if (isSelected) {
+                        { Icon(Icons.Rounded.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                    } else {
+                        null
+                    },
                 )
             }
         }

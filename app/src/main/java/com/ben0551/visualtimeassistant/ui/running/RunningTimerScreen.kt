@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -61,6 +63,7 @@ import com.ben0551.visualtimeassistant.util.DurationFormatter
  * Screen 3 - the running timer.
  * Priority order: countdown (~40% height), visual progress, animated background, status text.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RunningTimerScreen(
     totalSec: Int,
@@ -266,13 +269,14 @@ fun RunningTimerScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
+            // Wraps onto a second line on narrow phones so every control stays reachable.
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Button(
                     onClick = { viewModel.done() },
-                    modifier = Modifier.height(72.dp).width(200.dp).tvFocusScale(cornerRadius = 20.dp),
+                    modifier = Modifier.height(72.dp).width(180.dp).tvFocusScale(cornerRadius = 20.dp),
                 ) {
                     Text(
                         "DONE",
@@ -283,7 +287,7 @@ fun RunningTimerScreen(
                 }
                 OutlinedButton(
                     onClick = { viewModel.pauseOrResume() },
-                    modifier = Modifier.height(72.dp).width(160.dp).tvFocusScale(cornerRadius = 20.dp),
+                    modifier = Modifier.height(72.dp).width(140.dp).tvFocusScale(cornerRadius = 20.dp),
                 ) {
                     Text(
                         if (state.phase == TimerUiState.Phase.PAUSED) "RESUME" else "PAUSE",
