@@ -12,8 +12,10 @@ get real data about how long tasks actually take — or it can stop dead at zero
 
 | Android tablet | Android TV |
 | --- | --- |
-| ![Home - quick start cards](docs/screenshots/home-tablet.png) | ![Settings - remote-first controls](docs/screenshots/settings-tv.png) |
-| ![Running timer with wrapped controls](docs/screenshots/timer-tablet.png) | ![Statistics dashboard](docs/screenshots/statistics-tv.png) |
+| ![Home - quick start cards](docs/screenshots/home-tablet.png) | ![Home with the focused quick-start card outlined](docs/screenshots/home-tv.png) |
+| ![Running timer with wrapped controls](docs/screenshots/timer-tablet.png) | ![Settings - remote-first controls](docs/screenshots/settings-tv.png) |
+| ![Statistics dashboard](docs/screenshots/statistics-tv.png) | ![Accessibility options, focused row outlined](docs/screenshots/settings-accessibility.png) |
+| ![Running timer on TV](docs/screenshots/timer-tv.png) | |
 
 ## Features
 
