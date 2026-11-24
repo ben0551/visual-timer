@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android TV home banner (320x180dp). Progress ring + rising time bars. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+    <path
+        android:fillColor="#0B1620"
+        android:pathData="M0,0h320v180h-320z" />
+    <!-- progress ring -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="6"
+        android:pathData="M92,90 m-52,0 a52,52 0 1,1 104,0 a52,52 0 1,1 -104,0" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFC107"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:pathData="M92,38 a52,52 0 0,1 45,26" />
+    <!-- rising bars -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M196,142h90v7h-90z" />
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M204,112h16v30h-16z" />
+    <path
+        android:fillColor="#FFC107"
+        android:pathData="M232,84h16v58h-16z" />
+    <path
+        android:fillColor="#FF7043"
+        android:pathData="M260,56h16v86h-16z" />
+</vector>
