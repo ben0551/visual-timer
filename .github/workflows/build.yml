@@ -17,8 +17,25 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      # android-actions/setup-android@v3 is broken upstream: it runs
+      # `sdkmanager --install tools`, a package removed from the SDK repository.
+      # The runner image already ships an Android SDK, so prepare it directly.
+      - name: Prepare Android SDK
+        run: |
+          ANDROID_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDKMANAGER" ]; then
+            echo "cmdline-tools missing; downloading"
+            mkdir -p "$ANDROID_HOME/cmdline-tools" /tmp/cmdline
+            curl -fsSL -o /tmp/cmdline-tools.zip \
+              https://dl.google.com/android/repository/commandlinetools-linux-9862592_latest.zip
+            python3 -c "import zipfile; zipfile.ZipFile('/tmp/cmdline-tools.zip').extractall('/tmp/cmdline')"
+            mv /tmp/cmdline/cmdline-tools "$ANDROID_HOME/cmdline-tools/latest"
+          fi
+          export ANDROID_HOME ANDROID_SDK_ROOT="$ANDROID_HOME"
+          yes | "$SDKMANAGER" --licenses
+          "$SDKMANAGER" --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
 
       - name: Build debug APK and run unit tests
         run: ./gradlew assembleDebug testDebugUnitTest --stacktrace
@@ -26,6 +43,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: visual-time-assistant-debug
+          name: visual-timer-debug
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
