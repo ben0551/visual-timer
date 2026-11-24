@@ -39,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -75,7 +76,7 @@ fun SettingsScreen() {
             )
         }
 
-        stickyHeader { SectionTitle("DISPLAY") }
+        item { SectionTitle("DISPLAY") }
         item {
             ToggleRow(
                 title = "Show countdown",
@@ -109,7 +110,7 @@ fun SettingsScreen() {
             )
         }
 
-        stickyHeader { SectionTitle("THEME") }
+        item { SectionTitle("THEME") }
         item {
             ChoiceRow(
                 title = "Animated environment",
@@ -119,7 +120,7 @@ fun SettingsScreen() {
             )
         }
 
-        stickyHeader { SectionTitle("NOTIFICATIONS") }
+        item { SectionTitle("NOTIFICATIONS") }
         item {
             ToggleRow(
                 title = "Voice prompts",
@@ -151,7 +152,7 @@ fun SettingsScreen() {
             }
         }
 
-        stickyHeader { SectionTitle("ACCESSIBILITY") }
+        item { SectionTitle("ACCESSIBILITY") }
         item {
             ToggleRow("High contrast", "Pure black and white surfaces", settings.highContrast) { v ->
                 viewModel.update { it.copy(highContrast = v) }
@@ -340,7 +341,9 @@ private fun MilestonesEditor(
             isError = error != null,
             label = { Text("Percentages") },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
+            // Remote focus must not get trapped in the text editor: the presets are the
+            // primary path, and DPAD arrows would otherwise just move the caret.
+            modifier = Modifier.fillMaxWidth().focusProperties { canFocus = false },
         )
         if (error != null) {
             Text(error!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)

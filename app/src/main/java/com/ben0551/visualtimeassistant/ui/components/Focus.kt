@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun Modifier.tvFocusScale(
-    scale: Float = 1.07f,
-    borderWidth: Dp = 4.dp,
+    scale: Float = 1.08f,
+    borderWidth: Dp = 5.dp,
     borderColor: Color = MaterialTheme.colorScheme.primary,
     cornerRadius: Dp = 16.dp,
 ): Modifier {
@@ -42,7 +42,7 @@ fun Modifier.tvFocusScale(
     return this
         .onFocusChanged { state -> focused = state.isFocused }
         .clip(shape)
-        .background(if (focused) borderColor.copy(alpha = 0.18f) else Color.Transparent, shape)
+        .background(if (focused) borderColor.copy(alpha = 0.30f) else Color.Transparent, shape)
         .border(
             BorderStroke(borderWidth, if (focused) borderColor else Color.Transparent),
             shape,

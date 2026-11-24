@@ -14,8 +14,8 @@ android {
         applicationId = "com.ben0551.visualtimeassistant"
         minSdk = 23
         targetSdk = 35
-        versionCode = 8
-        versionName = "1.6"
+        versionCode = 9
+        versionName = "1.7"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

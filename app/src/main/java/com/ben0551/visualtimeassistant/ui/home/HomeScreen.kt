@@ -165,7 +165,6 @@ private fun QuickCard(
     initialFocus: Boolean = false,
     onClick: () -> Unit,
 ) {
-    // Requesting focus from inside the item means the requester is already attached.
     // The navigation rail grabs focus during its own initialisation, so keep trying:
     // on a TV the first thing the user must see is where the remote is.
     val focusRequester = remember { FocusRequester() }
