@@ -9,7 +9,12 @@ plugins {
     id("org.jetbrains.kotlin.kapt")
 }
 
-/** Key name for the release signing config built below. */
+/**
+ * Release signing reads `keystore/keystore.properties` (git-ignored) when present, otherwise
+ * the environment variables used by CI. Both are optional at configuration time: without them
+ * the app still configures, builds and tests - only a release *bundle* is refused, because
+ * shipping an unsigned AAB is never acceptable.
+ */
 val releaseSigningConfigName: String = "upload"
 
 val keystoreProperties = Properties().apply {
@@ -17,21 +22,30 @@ val keystoreProperties = Properties().apply {
     if (file.exists()) file.inputStream().use { load(it) }
 }
 
+val hasUploadKeystore: Boolean =
+    rootProject.file("keystore/keystore.properties").exists() ||
+        System.getenv("PLAY_KEYSTORE_PATH") != null ||
+        System.getenv("PLAY_KEYSTORE_PASSWORD") != null
+
 android {
     signingConfigs {
-        create(releaseSigningConfigName) {
-            storeFile = keystoreProperties.getProperty("STORE_FILE")?.let { file(it) }
-                ?: System.getenv("PLAY_KEYSTORE_PATH")?.let { file(it) }
-                ?: throw GradleException(
-                    "No release keystore configured. Create keystore/keystore.properties " +
-                        "(see keystore/README.md) or set PLAY_KEYSTORE_PATH.",
-                )
-            storePassword = keystoreProperties.getProperty("STORE_PASSWORD")
-                ?: System.getenv("PLAY_KEYSTORE_PASSWORD")
-            keyAlias = keystoreProperties.getProperty("KEY_ALIAS")
-                ?: System.getenv("PLAY_KEY_ALIAS") ?: "upload"
-            keyPassword = keystoreProperties.getProperty("KEY_PASSWORD")
-                ?: System.getenv("PLAY_KEY_PASSWORD")
+        if (hasUploadKeystore) {
+            create(releaseSigningConfigName) {
+                val keystoreFile: File? = keystoreProperties.getProperty("STORE_FILE")?.let { file(it) }
+                    ?: System.getenv("PLAY_KEYSTORE_PATH")?.let { file(it) }
+                requireNotNull(keystoreFile) {
+                    "Release keystore not configured. Create keystore/keystore.properties " +
+                        "(see keystore/README.md) or set PLAY_KEYSTORE_PATH."
+                }
+                require(keystoreFile.exists()) { "Release keystore not found: $keystoreFile" }
+                storeFile = keystoreFile
+                storePassword = keystoreProperties.getProperty("STORE_PASSWORD")
+                    ?: System.getenv("PLAY_KEYSTORE_PASSWORD")
+                keyAlias = keystoreProperties.getProperty("KEY_ALIAS")
+                    ?: System.getenv("PLAY_KEY_ALIAS") ?: "upload"
+                keyPassword = keystoreProperties.getProperty("KEY_PASSWORD")
+                    ?: System.getenv("PLAY_KEY_PASSWORD")
+            }
         }
     }
     namespace = "com.ben0551.visualtimeassistant"
@@ -53,7 +67,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            signingConfig = signingConfigs.getByName(releaseSigningConfigName)
+            signingConfig = if (hasUploadKeystore) {
+                signingConfigs.getByName(releaseSigningConfigName)
+            } else {
+                // No keystore configured: keep the project buildable (debug/tests/CI) and leave
+                // release unsigned rather than breaking configuration.
+                signingConfigs.getByName("debug")
+            }
         }
     }
 

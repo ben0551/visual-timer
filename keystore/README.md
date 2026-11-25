@@ -5,7 +5,9 @@
 
 `app/build.gradle.kts` reads those properties and signs `release`; if the file is missing it
 falls back to environment variables (`PLAY_KEYSTORE_PATH`, `PLAY_KEYSTORE_PASSWORD`,
-`PLAY_KEY_ALIAS`, `PLAY_KEY_PASSWORD`) and otherwise fails the build instead of shipping unsigned.
+`PLAY_KEY_ALIAS`, `PLAY_KEY_PASSWORD`). With neither present the project still configures,
+builds debug APKs and runs tests (that is what CI does) - a release build then falls back to the
+debug key rather than failing configuration, so never ship that variant as a real release.
 
 ## Build
 
