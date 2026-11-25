@@ -58,6 +58,13 @@ enum class WarningProfileId(
 object TimerLimits {
     const val MIN_SECONDS = 10
     const val MAX_SECONDS = 24 * 60 * 60
+
+    /**
+     * Below this many seconds remaining the warning system stays quiet: countdown chatter in
+     * the last few seconds of a short timer arrives on top of itself and means nothing to a
+     * child ("1 second remaining" right before "time up"). Expiry always announces.
+     */
+    const val MIN_ANNOUNCE_SECONDS = 15
     const val DAD_MODE_DEFAULT_THRESHOLD_PERCENT = 5
     const val DAD_MODE_MIN_THRESHOLD_PERCENT = 1
     const val DAD_MODE_MAX_THRESHOLD_PERCENT = 50

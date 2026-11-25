@@ -26,7 +26,7 @@ get real data about how long tasks actually take — or it can stop dead at zero
 | Running timer | Countdown sized for 5–10 m legibility, elapsed-growth progress, pause/resume |
 | Progress modes | Bar, circular, blocks, combined (bar + percentage) |
 | Themes | Forest Growth, Rocket Launch, Aquarium, Space Journey, Potato Empire™, Random |
-| Warning system | 50 % chime → 25 % voice → 10 % voice + highlight → 5 % Dad Mode → expiry |
+| Warning system | 50 % chime → 25 % voice → 10 % voice + highlight → 5 % Dad Mode → expiry. Nothing is announced below 15 seconds remaining - short timers stay quiet and only say "time is up" |
 | Dad Mode | Adjustable 1–50 % threshold: dim, pulsing bar, flashing amber frame, spoken prompt |
 | Overtime | Optional. On: keeps counting past zero ("TIME IS UP · LATE BY 00:34"). Off: zero ends it |
 | Analytics | Today's runs/on-time/late, 7 & 30 day average overtime, most difficult / easiest tasks |

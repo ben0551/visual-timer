@@ -55,6 +55,43 @@ class MilestoneEvaluatorTest {
     }
 
     @Test
+    fun `short timers stay quiet below fifteen seconds and only announce expiry`() {
+        val engine = MilestoneEvaluator(
+            totalSeconds = 10,
+            profile = WarningProfileId.DEFAULT,
+            dadModeEnabled = true,
+            dadThresholdPercent = 5,
+        )
+
+        val alerts = mutableListOf<AlertKind>()
+        listOf(10 to 5, 5 to 1, 1 to 0).forEach { (previous, current) ->
+            engine.onTick(previous, current).forEach { alerts += it.kind }
+        }
+
+        assertEquals(listOf(AlertKind.EXPIRED), alerts)
+    }
+
+    @Test
+    fun `milestones inside the last fifteen seconds are skipped`() {
+        val engine = MilestoneEvaluator(
+            totalSeconds = 60,
+            profile = WarningProfileId.DEFAULT,
+            dadModeEnabled = true,
+            dadThresholdPercent = 5,
+        )
+
+        val alerts = mutableListOf<AlertKind>()
+        // 25% of 60 s is exactly 15 s - still announced; the 10% and 5% points are not.
+        listOf(30 to 15, 15 to 9, 9 to 0).forEach { (previous, current) ->
+            engine.onTick(previous, current).forEach { alerts += it.kind }
+        }
+
+        assertTrue(alerts.contains(AlertKind.VOICE))
+        assertTrue(alerts.none { it == AlertKind.VOICE_HIGHLIGHT || it == AlertKind.DAD_MODE })
+        assertEquals(1, alerts.count { it == AlertKind.EXPIRED })
+    }
+
+    @Test
     fun `voice messages match the PRD wording`() {
         assertEquals("Half your time remains.", VoiceMessages.remaining(50))
         assertEquals("One quarter of your time remains.", VoiceMessages.remaining(25))

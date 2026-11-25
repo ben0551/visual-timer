@@ -252,6 +252,7 @@ class RunningTimerViewModel @Inject constructor(
     }
 
     private fun handleAlert(alert: com.ben0551.visualtimeassistant.timer.TimerAlert) {
+        android.util.Log.i("VTAlert", "kind=${alert.kind} percent=${alert.percent} msg=${alert.message}")
         val muted = mutedNow
         val voiceOn = settings.voiceEnabled && !muted
         when (alert.kind) {

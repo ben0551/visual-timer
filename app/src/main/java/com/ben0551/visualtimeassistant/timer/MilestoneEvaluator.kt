@@ -1,5 +1,6 @@
 package com.ben0551.visualtimeassistant.timer
 
+import com.ben0551.visualtimeassistant.domain.model.TimerLimits
 import com.ben0551.visualtimeassistant.domain.model.VoiceMessages
 import com.ben0551.visualtimeassistant.domain.model.WarningProfileId
 
@@ -55,36 +56,40 @@ class MilestoneEvaluator(
             alerts += TimerAlert(AlertKind.EXPIRED, 0, VoiceMessages.TIME_IS_UP)
         }
 
-        if (crossed(previousPercent, currentPercent, profile.chimePercent) &&
-            fired.add("$CHIME_KEY:${profile.chimePercent}")
-        ) {
-            alerts += TimerAlert(AlertKind.CHIME, profile.chimePercent, message = "")
-        }
-
-        profile.voicePercents.forEach { milestone ->
-            if (crossed(previousPercent, currentPercent, milestone) && fired.add("$VOICE_KEY:$milestone")) {
-                alerts += TimerAlert(
-                    kind = if (milestone <= 10) AlertKind.VOICE_HIGHLIGHT else AlertKind.VOICE,
-                    percent = milestone,
-                    message = VoiceMessages.remaining(milestone),
-                )
+        // Nothing spoken or chimed in the last fifteen seconds - those ticks overlap the
+        // expiry message and turn a short timer into a wall of words.
+        if (remainingSec >= TimerLimits.MIN_ANNOUNCE_SECONDS) {
+            if (crossed(previousPercent, currentPercent, profile.chimePercent) &&
+                fired.add("$CHIME_KEY:${profile.chimePercent}")
+            ) {
+                alerts += TimerAlert(AlertKind.CHIME, profile.chimePercent, message = "")
             }
-        }
 
-        custom.filter { it !in profile.voicePercents }.forEach { milestone ->
-            if (crossed(previousPercent, currentPercent, milestone) && fired.add("$CUSTOM_KEY:$milestone")) {
-                alerts += TimerAlert(AlertKind.VOICE, milestone, VoiceMessages.remaining(milestone))
+            profile.voicePercents.forEach { milestone ->
+                if (crossed(previousPercent, currentPercent, milestone) && fired.add("$VOICE_KEY:$milestone")) {
+                    alerts += TimerAlert(
+                        kind = if (milestone <= 10) AlertKind.VOICE_HIGHLIGHT else AlertKind.VOICE,
+                        percent = milestone,
+                        message = VoiceMessages.remaining(milestone),
+                    )
+                }
             }
-        }
 
-        if (dadModeEnabled) {
-            val threshold = dadThresholdPercent.coerceIn(1, 99)
-            if (crossed(previousPercent, currentPercent, threshold) && fired.add(DAD_KEY)) {
-                alerts += TimerAlert(
-                    AlertKind.DAD_MODE,
-                    threshold,
-                    VoiceMessages.dadMode(threshold, totalSeconds),
-                )
+            custom.filter { it !in profile.voicePercents }.forEach { milestone ->
+                if (crossed(previousPercent, currentPercent, milestone) && fired.add("$CUSTOM_KEY:$milestone")) {
+                    alerts += TimerAlert(AlertKind.VOICE, milestone, VoiceMessages.remaining(milestone))
+                }
+            }
+
+            if (dadModeEnabled) {
+                val threshold = dadThresholdPercent.coerceIn(1, 99)
+                if (crossed(previousPercent, currentPercent, threshold) && fired.add(DAD_KEY)) {
+                    alerts += TimerAlert(
+                        AlertKind.DAD_MODE,
+                        threshold,
+                        VoiceMessages.dadMode(threshold, totalSeconds),
+                    )
+                }
             }
         }
 
