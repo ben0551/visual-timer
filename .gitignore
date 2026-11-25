@@ -13,4 +13,9 @@ local.properties
 build/
 app/build/
 
+# Release signing secrets - never commit.
+keystore/*.jks
+keystore/*.keystore
+keystore/keystore.properties
+
 .kotlin/

@@ -1,3 +1,6 @@
+import java.util.Properties
+import org.gradle.api.GradleException
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -6,7 +9,31 @@ plugins {
     id("org.jetbrains.kotlin.kapt")
 }
 
+/** Key name for the release signing config built below. */
+val releaseSigningConfigName: String = "upload"
+
+val keystoreProperties = Properties().apply {
+    val file = rootProject.file("keystore/keystore.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+
 android {
+    signingConfigs {
+        create(releaseSigningConfigName) {
+            storeFile = keystoreProperties.getProperty("STORE_FILE")?.let { file(it) }
+                ?: System.getenv("PLAY_KEYSTORE_PATH")?.let { file(it) }
+                ?: throw GradleException(
+                    "No release keystore configured. Create keystore/keystore.properties " +
+                        "(see keystore/README.md) or set PLAY_KEYSTORE_PATH.",
+                )
+            storePassword = keystoreProperties.getProperty("STORE_PASSWORD")
+                ?: System.getenv("PLAY_KEYSTORE_PASSWORD")
+            keyAlias = keystoreProperties.getProperty("KEY_ALIAS")
+                ?: System.getenv("PLAY_KEY_ALIAS") ?: "upload"
+            keyPassword = keystoreProperties.getProperty("KEY_PASSWORD")
+                ?: System.getenv("PLAY_KEY_PASSWORD")
+        }
+    }
     namespace = "com.ben0551.visualtimeassistant"
     compileSdk = 35
 
@@ -26,7 +53,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName(releaseSigningConfigName)
         }
     }
 
