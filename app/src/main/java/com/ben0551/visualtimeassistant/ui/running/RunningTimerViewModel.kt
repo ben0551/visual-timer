@@ -122,6 +122,7 @@ class RunningTimerViewModel @Inject constructor(
                 profile = warningProfile,
                 dadModeEnabled = settings.dadModeEnabled,
                 dadThresholdPercent = settings.dadModeThresholdPercent,
+                announcementStyle = settings.announcementStyle,
                 customMilestones = settings.customMilestones,
             )
             anchorElapsedMs = SystemClock.elapsedRealtime()

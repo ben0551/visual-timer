@@ -19,6 +19,7 @@ data class AppSettings(
     val displayMode: DisplayMode = DisplayMode.BAR,
     val theme: ThemeId = ThemeId.FOREST,
     val voiceEnabled: Boolean = true,
+    val announcementStyle: AnnouncementStyle = AnnouncementStyle.PERCENT,
     val customMilestones: List<Int> = listOf(25, 50, 75, 100),
     val dadModeEnabled: Boolean = true,
     val dadModeThresholdPercent: Int = TimerLimits.DAD_MODE_DEFAULT_THRESHOLD_PERCENT,

@@ -3,6 +3,7 @@ package com.ben0551.visualtimeassistant.data
 import com.ben0551.visualtimeassistant.data.entity.AppSettingsEntity
 import com.ben0551.visualtimeassistant.data.entity.PresetEntity
 import com.ben0551.visualtimeassistant.data.entity.TimerSessionEntity
+import com.ben0551.visualtimeassistant.domain.model.AnnouncementStyle
 import com.ben0551.visualtimeassistant.domain.model.AppSettings
 import com.ben0551.visualtimeassistant.domain.model.DisplayMode
 import com.ben0551.visualtimeassistant.domain.model.Preset
@@ -67,6 +68,7 @@ fun AppSettingsEntity.toDomain(): AppSettings = AppSettings(
     displayMode = DisplayMode.fromName(displayMode),
     theme = ThemeId.fromName(theme),
     voiceEnabled = voiceEnabled,
+    announcementStyle = AnnouncementStyle.fromName(announcementStyle),
     customMilestones = parseMilestones(customMilestones),
     dadModeEnabled = dadModeEnabled,
     dadModeThresholdPercent = dadModeThresholdPercent,
@@ -86,6 +88,7 @@ fun AppSettings.toEntity(): AppSettingsEntity = AppSettingsEntity(
     displayMode = displayMode.name,
     theme = theme.name,
     voiceEnabled = voiceEnabled,
+    announcementStyle = announcementStyle.name,
     customMilestones = milestonesToCsv(customMilestones),
     dadModeEnabled = dadModeEnabled,
     dadModeThresholdPercent = dadModeThresholdPercent,

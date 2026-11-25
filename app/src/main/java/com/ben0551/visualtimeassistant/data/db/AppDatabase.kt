@@ -13,7 +13,7 @@ import com.ben0551.visualtimeassistant.data.entity.TimerSessionEntity
         PresetEntity::class,
         AppSettingsEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -27,6 +27,14 @@ abstract class AppDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
                     "ALTER TABLE app_settings ADD COLUMN overtimeEnabled INTEGER NOT NULL DEFAULT 1",
+                )
+            }
+        }
+        /** v3 added the spoken announcement style to the single settings row. */
+        val MIGRATION_2_3 = object : androidx.room.migration.Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE app_settings ADD COLUMN announcementStyle TEXT NOT NULL DEFAULT 'PERCENT'",
                 )
             }
         }

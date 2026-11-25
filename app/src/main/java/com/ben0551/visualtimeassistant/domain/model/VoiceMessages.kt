@@ -14,6 +14,14 @@ object VoiceMessages {
         else -> "Only $percent percent remaining."
     }
 
+    /** Announcement in the parent's chosen style, using the actual seconds left. */
+    fun remaining(percent: Int, remainingSec: Int, style: AnnouncementStyle): String =
+        if (style == AnnouncementStyle.TIME_REMAINING) {
+            "${humanDuration(remainingSec.coerceAtLeast(0))} remaining."
+        } else {
+            remaining(percent)
+        }
+
     /** Dad Mode line: says how much time is actually left at the threshold. */
     fun dadMode(thresholdPercent: Int, totalSeconds: Int): String {
         val remainingSec = remainingSeconds(thresholdPercent, totalSeconds)

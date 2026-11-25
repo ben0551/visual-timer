@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ben0551.visualtimeassistant.data.parseMilestones
+import com.ben0551.visualtimeassistant.domain.model.AnnouncementStyle
 import com.ben0551.visualtimeassistant.domain.model.DisplayMode
 import com.ben0551.visualtimeassistant.domain.model.ThemeId
 import com.ben0551.visualtimeassistant.domain.model.TimerLimits
@@ -151,6 +152,21 @@ fun SettingsScreen() {
                 subtitle = "Spoken announcements at milestones",
                 checked = settings.voiceEnabled,
                 onChange = { value -> viewModel.update { it.copy(voiceEnabled = value) } },
+            )
+        }
+        item {
+            ChoiceRow(
+                title = "Voice cue style",
+                options = listOf(
+                    AnnouncementStyle.PERCENT.name to AnnouncementStyle.PERCENT.label,
+                    AnnouncementStyle.TIME_REMAINING.name to AnnouncementStyle.TIME_REMAINING.label,
+                ),
+                selectedKey = settings.announcementStyle.name,
+                onSelect = { key ->
+                    viewModel.update {
+                        it.copy(announcementStyle = AnnouncementStyle.valueOf(key))
+                    }
+                },
             )
         }
         item {

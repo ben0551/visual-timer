@@ -35,6 +35,17 @@ enum class DisplayMode(val label: String) {
     }
 }
 
+/** How milestone announcements describe the time left. */
+enum class AnnouncementStyle(val label: String) {
+    PERCENT("Percentage"),
+    TIME_REMAINING("Time left");
+
+    companion object {
+        fun fromName(name: String?): AnnouncementStyle =
+            entries.firstOrNull { it.name == name } ?: PERCENT
+    }
+}
+
 /**
  * Parent-configurable urgency profile.
  * [chimePercent] fires an audible chime when this much time is left,

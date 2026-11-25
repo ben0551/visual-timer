@@ -16,6 +16,8 @@ data class AppSettingsEntity(
     val displayMode: String = "BAR",
     val theme: String = "FOREST",
     val voiceEnabled: Boolean = true,
+    /** AnnouncementStyle name: "PERCENT" (default) or "TIME_REMAINING". */
+    val announcementStyle: String = "PERCENT",
     /** Comma separated percentages, e.g. "25,50,75,100". */
     val customMilestones: String = "25,50,75,100",
     val dadModeEnabled: Boolean = true,

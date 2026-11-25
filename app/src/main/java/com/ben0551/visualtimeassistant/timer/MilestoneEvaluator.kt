@@ -1,5 +1,6 @@
 package com.ben0551.visualtimeassistant.timer
 
+import com.ben0551.visualtimeassistant.domain.model.AnnouncementStyle
 import com.ben0551.visualtimeassistant.domain.model.TimerLimits
 import com.ben0551.visualtimeassistant.domain.model.VoiceMessages
 import com.ben0551.visualtimeassistant.domain.model.WarningProfileId
@@ -37,6 +38,7 @@ class MilestoneEvaluator(
     private val profile: WarningProfileId,
     private val dadModeEnabled: Boolean,
     private val dadThresholdPercent: Int,
+    private val announcementStyle: AnnouncementStyle = AnnouncementStyle.PERCENT,
     customMilestones: List<Int> = emptyList(),
 ) {
     private val fired = HashSet<String>()
@@ -70,14 +72,15 @@ class MilestoneEvaluator(
                     alerts += TimerAlert(
                         kind = if (milestone <= 10) AlertKind.VOICE_HIGHLIGHT else AlertKind.VOICE,
                         percent = milestone,
-                        message = VoiceMessages.remaining(milestone),
+                        message = VoiceMessages.remaining(milestone, remainingSec, announcementStyle),
                     )
                 }
             }
 
             custom.filter { it !in profile.voicePercents }.forEach { milestone ->
                 if (crossed(previousPercent, currentPercent, milestone) && fired.add("$CUSTOM_KEY:$milestone")) {
-                    alerts += TimerAlert(AlertKind.VOICE, milestone, VoiceMessages.remaining(milestone))
+                    alerts += TimerAlert(AlertKind.VOICE, milestone,
+                        VoiceMessages.remaining(milestone, remainingSec, announcementStyle))
                 }
             }
 
