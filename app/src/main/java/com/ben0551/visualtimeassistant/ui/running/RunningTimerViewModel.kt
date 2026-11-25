@@ -86,6 +86,7 @@ class RunningTimerViewModel @Inject constructor(
     private var recorded = false
     private var started = false
     private var mutedNow = false
+    private var exitRequested = false
 
     /** Called once per composition with the nav arguments; restarts if they change. */
     fun start(
@@ -99,7 +100,7 @@ class RunningTimerViewModel @Inject constructor(
         val displayName = presetName.ifBlank { "Custom Timer" }
         // Navigation composes the destination once with default arguments before the real
         // ones land; ignore no-op repeats but re-configure when the request differs.
-        if (started &&
+        if (started && !exitRequested &&
             _uiState.value.totalSec == totalSec &&
             _uiState.value.presetName == displayName &&
             _uiState.value.displayTheme == resolvedTheme &&
@@ -108,6 +109,7 @@ class RunningTimerViewModel @Inject constructor(
             return
         }
         started = true
+        exitRequested = false
         this.presetId = presetId
         this.warningProfile = warningProfile
         startWallClock = System.currentTimeMillis()
@@ -174,14 +176,27 @@ class RunningTimerViewModel @Inject constructor(
 
     /** Parent confirms the task is done: records the session and leaves the screen. */
     fun done() {
+        stopRun()
         record()
         emitFinished()
     }
 
     /** Back press: keeps overtime data (that is the useful part), drops unfinished runs. */
     fun abandon() {
+        stopRun()
         if (_uiState.value.isOvertime) record() else recorded = true
         emitFinished()
+    }
+
+    /**
+     * Leaving the running screen must silence the timer immediately. Otherwise the ticking
+     * coroutine can keep crossing milestones and the singleton TTS keeps talking about time
+     * remaining after DONE/STOP has been pressed.
+     */
+    private fun stopRun() {
+        exitRequested = true
+        tickJob?.cancel()
+        speakerAnnouncer.stop()
     }
 
     private fun emitFinished() {
@@ -217,7 +232,11 @@ class RunningTimerViewModel @Inject constructor(
                 val elapsedSec = (elapsedMs / 1000L).toInt().coerceAtLeast(0)
                 val remainingSec = _uiState.value.totalSec - elapsedSec
                 publish(elapsedSec, remainingSec)
-                evaluator?.onTick(lastRemainingSec, remainingSec)?.forEach(::handleAlert)
+                if (exitRequested) break
+                evaluator?.onTick(lastRemainingSec, remainingSec)?.forEach { alert ->
+                    if (exitRequested) return@forEach
+                    handleAlert(alert)
+                }
                 lastRemainingSec = remainingSec
                 delay(TICK_MS)
             }
@@ -252,6 +271,7 @@ class RunningTimerViewModel @Inject constructor(
     }
 
     private fun handleAlert(alert: com.ben0551.visualtimeassistant.timer.TimerAlert) {
+        if (exitRequested) return
         android.util.Log.i("VTAlert", "kind=${alert.kind} percent=${alert.percent} msg=${alert.message}")
         val muted = mutedNow
         val voiceOn = settings.voiceEnabled && !muted
@@ -274,7 +294,9 @@ class RunningTimerViewModel @Inject constructor(
     }
 
     override fun onCleared() {
+        exitRequested = true
         tickJob?.cancel()
+        speakerAnnouncer.stop()
         super.onCleared()
     }
 
