@@ -26,7 +26,7 @@ data class AppSettingsEntity(
     val colourBlindPalette: Boolean = false,
     val muteMode: Boolean = false,
     /** When false, reaching zero ends the timer: no overtime clock and no "late" tracking. */
-    val overtimeEnabled: Boolean = true,
+    val overtimeEnabled: Boolean = false,
 ) {
     companion object {
         const val ROW_ID = 1

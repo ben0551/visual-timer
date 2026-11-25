@@ -28,7 +28,7 @@ get real data about how long tasks actually take — or it can stop dead at zero
 | Themes | Forest Growth, Rocket Launch, Aquarium, Space Journey, Potato Empire™, Random |
 | Warning system | 50 % chime → 25 % voice → 10 % voice + highlight → 5 % Dad Mode → expiry. Nothing is announced below 15 seconds remaining - short timers stay quiet and only say "time is up" |
 | Dad Mode | Adjustable 1–50 % threshold: dim, pulsing bar, flashing amber frame, spoken prompt |
-| Overtime | Optional. On: keeps counting past zero ("TIME IS UP · LATE BY 00:34"). Off: zero ends it |
+| Overtime | Optional and **off by default**. On: keeps counting past zero ("TIME IS UP · LATE BY 00:34"). Off (default): zero ends it |
 | Analytics | Today's runs/on-time/late, 7 & 30 day average overtime, most difficult / easiest tasks |
 | Presets | Parent-editable name, duration, theme, warning profile, favourite |
 | Settings | Remote-first: whole-row toggles, wrapping chips, ON/OFF labels, mute button on the timer |
