@@ -87,7 +87,7 @@ or `--es vta_until "8:45"` (the app works out the remaining time and titles it
 `8:45 Timer`; a time that has already passed counts down to tomorrow's).
 
 Say *"set a timer on the TV to 15"*, *"dinner at 8:45"* or *"start my Morning Routine
-preset"* to Hermes and it maps onto those commands (see the `visual-time-assistant`
+preset"* to Hermes and it maps onto those commands (see the `visual-timer`
 skill). Full parameter table, behaviour notes and verification steps are in
 **[AGENTS.md](AGENTS.md)**.
 

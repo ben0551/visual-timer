@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Visual Time Assistant"
+rootProject.name = "Visual Timer"
 include(":app")

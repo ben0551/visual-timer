@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Start a Visual Time Assistant timer on Ben's Google TV over adb.
+# Start a Visual Timer countdown on Ben's Google TV over adb.
 #
 # Usage:  tv_timer.sh <minutes|HH:MM> [theme] [name]
 # Example: tv_timer.sh 15 FOREST "Morning Routine"
